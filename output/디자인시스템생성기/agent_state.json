@@ -1,0 +1,15 @@
+{
+  "project": "디자인시스템생성기",
+  "pipeline_status": "idle",
+  "current_command": null,
+  "last_updated": "2026-05-26T00:00:00Z",
+  "agents": {
+    "product_manager": { "persona": "피엠", "status": "idle", "last_action": null, "ts": null },
+    "information_architect": { "persona": "아이에이", "status": "idle", "last_action": null, "ts": null },
+    "ux_specification_agent": { "persona": "유엑스", "status": "idle", "last_action": null, "ts": null },
+    "agile_scrum_master": { "persona": "스크럼", "status": "idle", "last_action": null, "ts": null },
+    "database_architect": { "persona": "디비", "status": "idle", "last_action": null, "ts": null },
+    "validator": { "persona": "발리", "status": "idle", "last_action": null, "ts": null },
+    "change_manager": { "persona": "체인저", "status": "idle", "last_action": null, "ts": null }
+  }
+}

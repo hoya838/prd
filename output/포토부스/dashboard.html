@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ai_pm_editor — 에이전트 대시보드</title>
+<style>
+  :root {
+    --bg: #0f0f13;
+    --panel: #1a1a24;
+    --border: #2a2a3a;
+    --text: #e0e0f0;
+    --muted: #666688;
+    --idle: #3a3a4a;
+    --idle-glow: #3a3a4a;
+    --running: #f5a623;
+    --running-glow: rgba(245, 166, 35, 0.4);
+    --completed: #4caf7d;
+    --completed-glow: rgba(76, 175, 125, 0.3);
+    --failed: #e05555;
+    --failed-glow: rgba(224, 85, 85, 0.3);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.05em; color: #b0b0d0; }
+  #pipeline-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  #status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--idle);
+    transition: background 0.3s;
+  }
+  #status-dot.running { background: var(--running); animation: pulse 1.2s ease-in-out infinite; }
+  #status-dot.completed { background: var(--completed); }
+  #status-dot.failed { background: var(--failed); }
+  #current-cmd {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--running);
+    background: rgba(245, 166, 35, 0.08);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(245, 166, 35, 0.2);
+    display: none;
+  }
+  #last-updated { font-size: 11px; color: var(--muted); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 18px 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--idle);
+    transition: background 0.3s;
+  }
+  .card.running::before { background: var(--running); }
+  .card.running { border-color: rgba(245, 166, 35, 0.4); box-shadow: 0 0 16px var(--running-glow); }
+  .card.completed::before { background: var(--completed); }
+  .card.completed { border-color: rgba(76, 175, 125, 0.3); box-shadow: 0 0 12px var(--completed-glow); }
+  .card.failed::before { background: var(--failed); }
+  .card.failed { border-color: rgba(224, 85, 85, 0.3); box-shadow: 0 0 12px var(--failed-glow); }
+
+  .card-avatar {
+    font-size: 32px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .card.running .card-avatar { animation: bounce 0.6s ease-in-out infinite alternate; }
+
+  .card-persona {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    color: #d0d0f0;
+  }
+  .card-role {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .card-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(58, 58, 74, 0.6);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+  }
+  .card.running .card-status-badge {
+    background: rgba(245, 166, 35, 0.15);
+    color: var(--running);
+  }
+  .card.completed .card-status-badge {
+    background: rgba(76, 175, 125, 0.15);
+    color: var(--completed);
+  }
+  .card.failed .card-status-badge {
+    background: rgba(224, 85, 85, 0.15);
+    color: var(--failed);
+  }
+  .status-dot-small {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .card.running .status-dot-small { animation: pulse 1s ease-in-out infinite; }
+
+  .card-action {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+    min-height: 16px;
+    word-break: break-all;
+  }
+  .card.running .card-action { color: #c0a060; }
+
+  .pipeline-section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .pipeline-title {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+  .pipeline-flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .flow-node {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    background: var(--idle);
+    color: var(--muted);
+    transition: all 0.3s;
+  }
+  .flow-node.running {
+    background: rgba(245, 166, 35, 0.2);
+    color: var(--running);
+    box-shadow: 0 0 8px var(--running-glow);
+  }
+  .flow-node.completed { background: rgba(76, 175, 125, 0.2); color: var(--completed); }
+  .flow-arrow { color: var(--border); font-size: 14px; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-4px); }
+  }
+
+  #error-banner {
+    display: none;
+    background: rgba(224, 85, 85, 0.1);
+    border: 1px solid rgba(224, 85, 85, 0.3);
+    color: #e08888;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ai_pm_editor — 기획 자동화 대시보드</h1>
+  <div id="pipeline-status">
+    <div id="status-dot"></div>
+    <span id="status-label">대기 중</span>
+    <span id="current-cmd"></span>
+  </div>
+</header>
+
+<div id="error-banner">agent_state.json을 읽을 수 없습니다. 파일 경로를 확인하세요.</div>
+
+<div class="grid" id="agent-grid"></div>
+
+<div class="pipeline-section">
+  <div class="pipeline-title">기획 파이프라인 (/기획)</div>
+  <div class="pipeline-flow" id="pipeline-flow">
+    <div class="flow-node" data-agent="product_manager">피엠 · PRD</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" data-agent="information_architect">아이에이 · IA구조</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" data-agent="ux_specification_agent">유엑스 · 화면명세</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" data-agent="agile_scrum_master">스크럼 · 백로그</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" data-agent="database_architect">디비 · ERD</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" data-agent="validator">발리 · 검증</div>
+  </div>
+</div>
+
+<div style="text-align:right; margin-top:12px;">
+  <span id="last-updated" style="font-size:11px; color:#444466;">갱신 대기 중...</span>
+</div>
+
+<script>
+const AGENT_EMOJI = {
+  product_manager:        '📋',
+  information_architect:  '🗺️',
+  ux_specification_agent: '🎨',
+  agile_scrum_master:     '📊',
+  database_architect:     '🗄️',
+  validator:              '🔍',
+  knowledge_manager:      '📚',
+  project_supervisor:     '🕵️',
+};
+
+function statusLabel(s) {
+  return { idle: '대기', running: '실행 중', completed: '완료', failed: '실패' }[s] || s;
+}
+
+function renderGrid(state) {
+  const grid = document.getElementById('agent-grid');
+  const agents = state.agents || {};
+  const names = Object.keys(agents);
+
+  names.forEach(name => {
+    const a = agents[name];
+    let card = document.getElementById('card-' + name);
+    if (!card) {
+      card = document.createElement('div');
+      card.className = 'card';
+      card.id = 'card-' + name;
+      card.innerHTML = `
+        <span class="card-avatar">${AGENT_EMOJI[name] || '🤖'}</span>
+        <div class="card-persona">${a.persona}</div>
+        <div class="card-role">${a.role}</div>
+        <div class="card-status-badge">
+          <div class="status-dot-small"></div>
+          <span class="status-text">${statusLabel(a.status)}</span>
+        </div>
+        <div class="card-action">${a.last_action || ''}</div>
+      `;
+      grid.appendChild(card);
+    } else {
+      card.querySelector('.card-persona').textContent = a.persona;
+      card.querySelector('.card-role').textContent = a.role;
+      card.querySelector('.status-text').textContent = statusLabel(a.status);
+      card.querySelector('.card-action').textContent = a.last_action || '';
+    }
+    card.className = 'card ' + (a.status || 'idle');
+  });
+}
+
+function renderPipeline(state) {
+  const agents = state.agents || {};
+  document.querySelectorAll('.flow-node').forEach(node => {
+    const agentName = node.dataset.agent;
+    const s = agents[agentName]?.status || 'idle';
+    node.className = 'flow-node ' + s;
+  });
+}
+
+function renderHeader(state) {
+  const dot = document.getElementById('status-dot');
+  const label = document.getElementById('status-label');
+  const cmdEl = document.getElementById('current-cmd');
+  const ps = state.pipeline_status || 'idle';
+
+  dot.className = ps;
+  label.textContent = { idle: '대기 중', running: '실행 중', completed: '완료', failed: '오류' }[ps] || ps;
+
+  if (state.current_command) {
+    cmdEl.textContent = state.current_command;
+    cmdEl.style.display = 'inline-flex';
+  } else {
+    cmdEl.style.display = 'none';
+  }
+
+  if (state.last_updated) {
+    const d = new Date(state.last_updated);
+    document.getElementById('last-updated').textContent =
+      '마지막 갱신: ' + d.toLocaleTimeString('ko-KR');
+  }
+}
+
+async function poll() {
+  try {
+    const res = await fetch('./agent_state.json?t=' + Date.now());
+    if (!res.ok) throw new Error('fetch failed');
+    const state = await res.json();
+    document.getElementById('error-banner').style.display = 'none';
+    renderHeader(state);
+    renderGrid(state);
+    renderPipeline(state);
+  } catch (e) {
+    document.getElementById('error-banner').style.display = 'block';
+  }
+}
+
+poll();
+setInterval(poll, 1000);
+</script>
+</body>
+</html>

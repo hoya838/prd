@@ -1,0 +1,222 @@
+{
+  "sprint_backlog": [
+    {
+      "id": "TICKET-001",
+      "title": "프로젝트 목록 사이드바 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-001",
+      "story_points": 3,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "output/ 폴더 내 프로젝트 디렉토리 목록이 사이드바에 표시된다",
+        "현재 활성 프로젝트(active_project 파일 기준)가 강조 표시된다",
+        "프로젝트 클릭 시 해당 산출물 탭 영역으로 전환된다"
+      ]
+    },
+    {
+      "id": "TICKET-002",
+      "title": "산출물 탭 바 및 상태 배지 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-001",
+      "story_points": 2,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "PRD·IA·화면명세·스프린트백로그·ERD·정책 6개 탭이 표시된다",
+        "각 탭에 파일 존재 여부 배지가 표시된다",
+        "파일 존재 시 마지막 수정일이 표시된다"
+      ]
+    },
+    {
+      "id": "TICKET-003",
+      "title": "PRD 마크다운 렌더링 뷰 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-002",
+      "story_points": 2,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "PRD.md 파일을 읽어 HTML로 렌더링한다",
+        "파일 미존재 시 빈 상태 안내가 표시된다",
+        "마크다운 헤딩·목록·테이블이 올바르게 렌더링된다"
+      ]
+    },
+    {
+      "id": "TICKET-004",
+      "title": "IA CSV 테이블 뷰 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-003",
+      "story_points": 3,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "IA_Structure.csv를 파싱해 테이블로 표시한다",
+        "컬럼 헤더 클릭 시 정렬이 동작한다",
+        "화면명 검색 필터가 실시간으로 동작한다"
+      ]
+    },
+    {
+      "id": "TICKET-005",
+      "title": "화면명세 role 탭 뷰 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-004",
+      "story_points": 3,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "존재하는 Screen_Specs_[role].md 파일 기반으로 role 탭이 동적 생성된다",
+        "role 탭 클릭 시 해당 파일이 렌더링된다",
+        "파일 없는 role 탭은 비활성화된다"
+      ]
+    },
+    {
+      "id": "TICKET-006",
+      "title": "스프린트백로그 카드 뷰 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-005",
+      "story_points": 3,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "Sprint_Backlog.json을 파싱해 카드 목록으로 표시한다",
+        "priority·type·story_points 배지가 카드에 표시된다",
+        "deprecated 티켓은 흐리게 표시된다"
+      ]
+    },
+    {
+      "id": "TICKET-007",
+      "title": "티켓 상세 모달 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-005",
+      "story_points": 1,
+      "priority": "P2",
+      "acceptance_criteria": [
+        "티켓 카드 클릭 시 모달이 열린다",
+        "모달에 acceptance_criteria 전체가 표시된다"
+      ]
+    },
+    {
+      "id": "TICKET-008",
+      "title": "ERD Mermaid 다이어그램 뷰 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-006",
+      "story_points": 3,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "ERD.md를 렌더링하고 mermaid 블록을 다이어그램으로 변환한다",
+        "Mermaid 파싱 실패 시 코드블록 원문이 폴백으로 표시된다",
+        "다이어그램 줌/패닝이 동작한다"
+      ]
+    },
+    {
+      "id": "TICKET-009",
+      "title": "정책 마크다운 렌더링 뷰 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-007",
+      "story_points": 1,
+      "priority": "P2",
+      "acceptance_criteria": [
+        "Policy.md를 읽어 HTML로 렌더링한다",
+        "파일 미존재 시 빈 상태 안내가 표시된다"
+      ]
+    },
+    {
+      "id": "TICKET-010",
+      "title": "워크플로우 노드 플로우 캔버스 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-008",
+      "story_points": 8,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "PRD→IA→화면명세→백로그→ERD 5개 노드가 연결선으로 표시된다",
+        "각 노드에 파일 상태(준비/미생성)와 항목 수가 표시된다",
+        "framer-motion 진입 애니메이션이 적용된다"
+      ]
+    },
+    {
+      "id": "TICKET-011",
+      "title": "워크플로우 노드 슬라이드 패널 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-008",
+      "story_points": 5,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "노드 클릭 시 우측 슬라이드 패널이 열린다",
+        "패널에 해당 산출물 요약이 표시된다",
+        "패널 닫기 버튼으로 닫힌다"
+      ]
+    },
+    {
+      "id": "TICKET-012",
+      "title": "FR-SCR-TICKET 연결선 시각화",
+      "type": "feature",
+      "screen_id": "SCR-U-008",
+      "story_points": 5,
+      "priority": "P2",
+      "acceptance_criteria": [
+        "FR-NNN → SCR-NNN → TICKET-NNN 파급 관계가 연결선으로 표시된다",
+        "연결선 hover 시 관련 항목이 하이라이트된다"
+      ]
+    },
+    {
+      "id": "TICKET-013",
+      "title": "Google OAuth 로그인 구현",
+      "type": "feature",
+      "screen_id": "SCR-SH-001",
+      "story_points": 3,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "NextAuth.js Google Provider로 OAuth 로그인이 동작한다",
+        "로그인 성공 시 이메일 화이트리스트 검증 후 분기된다",
+        "GOOGLE_CLIENT_ID·GOOGLE_CLIENT_SECRET 환경변수 누락 시 앱 시작이 거부된다"
+      ]
+    },
+    {
+      "id": "TICKET-014",
+      "title": "이메일 화이트리스트 접근 제어 구현",
+      "type": "feature",
+      "screen_id": "SCR-SH-001",
+      "story_points": 2,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "ALLOWED_EMAILS에 없는 이메일은 SCR-SH-002로 리다이렉트된다",
+        "ALLOWED_DOMAINS에 없는 도메인은 접근 거부된다",
+        "환경변수 누락 시 앱 시작이 거부된다"
+      ]
+    },
+    {
+      "id": "TICKET-015",
+      "title": "접근 거부 화면 구현",
+      "type": "feature",
+      "screen_id": "SCR-SH-002",
+      "story_points": 1,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "미허용 계정 로그인 시 접근 거부 페이지가 표시된다",
+        "로그인한 이메일이 안내 메시지에 표시된다",
+        "로그아웃 버튼 클릭 시 세션이 삭제되고 로그인 페이지로 이동한다"
+      ]
+    },
+    {
+      "id": "TICKET-016",
+      "title": "이용약관·개인정보처리방침 동의 화면 구현",
+      "type": "legal",
+      "screen_id": "SCR-SH-003",
+      "story_points": 3,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "최초 로그인 시 동의 화면으로 리다이렉트된다",
+        "필수 항목 미동의 시 완료 버튼이 비활성화된다",
+        "동의 완료 시 ConsentLog가 저장되고 SCR-U-001로 이동한다"
+      ]
+    },
+    {
+      "id": "TICKET-017",
+      "title": "환경변수 검증 및 앱 시작 가드 구현",
+      "type": "feature",
+      "screen_id": "SCR-U-001",
+      "story_points": 2,
+      "priority": "P1",
+      "acceptance_criteria": [
+        "OUTPUT_BASE_PATH 미설정 시 앱 시작이 거부된다",
+        "ALLOWED_EMAILS·ALLOWED_DOMAINS 미설정 시 앱 시작이 거부된다",
+        "누락된 환경변수 목록이 콘솔에 출력된다"
+      ]
+    }
+  ]
+}
