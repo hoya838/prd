@@ -1,9 +1,10 @@
 "use client";
 
-import { CheckCircle2, Circle, FolderOpen, LogOut } from "lucide-react";
+import { CheckCircle2, Circle, FolderOpen, LogOut, House } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import type { ProjectInfo } from "@/app/api/projects/route";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Link from "next/link";
 
 const ARTIFACTS = ["PRD", "IA", "Screen_Specs", "Sprint_Backlog", "ERD", "Policy"] as const;
 
@@ -28,8 +29,10 @@ export function Sidebar({
     <div className="w-60 shrink-0 flex flex-col" style={{ background: "#000", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
       {/* Header with logo */}
       <div className="px-5 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="기획뷰어" style={{ height: 18, width: "auto", display: "block" }} />
+        <Link href="/" style={{ textDecoration: "none", display: "inline-block" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="기획뷰어" style={{ height: 18, width: "auto", display: "block" }} />
+        </Link>
         <p style={{ fontSize: 10, color: "#333", marginTop: 6, letterSpacing: "0.08em", textTransform: "uppercase" }}>ai_pm_editor</p>
       </div>
 
@@ -90,6 +93,16 @@ export function Sidebar({
             {session?.user?.name ?? session?.user?.email ?? ""}
           </p>
         </div>
+        <Link
+          href="/"
+          title="홈으로"
+          className="shrink-0 transition-colors"
+          style={{ color: "#333", lineHeight: 0 }}
+          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#999")}
+          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "#333")}
+        >
+          <House className="w-3.5 h-3.5" />
+        </Link>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
           title="로그아웃"
