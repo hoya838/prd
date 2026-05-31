@@ -6,7 +6,6 @@ import { motion, useScroll, useTransform, AnimatePresence, type Variants } from 
 import { useRouter } from "next/navigation";
 import { ArrowRight, FileText, Layers, GitBranch, Menu, X } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 
 // ── Design tokens (design.md) ──────────────────────────────────────────────
 const C = {
@@ -104,7 +103,8 @@ function Header() {
       >
         {/* Logo */}
         <Link href="/" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
-          <Image src="/logo.png" alt="기획뷰어" width={119} height={27} style={{ height: 24, width: "auto", display: "block" }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="기획뷰어" style={{ height: 24, width: "auto", display: "block" }} />
         </Link>
 
         {/* Desktop nav */}
@@ -526,7 +526,8 @@ export default function LandingPage() {
         style={{ borderTop: `1px solid ${C.hairlineSoft}`, padding: "40px 24px", maxWidth: "none" }}
       >
         <div>
-          <Image src="/logo.png" alt="기획뷰어" width={119} height={27} style={{ height: 18, width: "auto", display: "block", opacity: 0.4 }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="기획뷰어" style={{ height: 18, width: "auto", display: "block", opacity: 0.4 }} />
         </div>
         <p style={{ fontSize: 12, color: "#333", letterSpacing: "-0.12px", margin: 0 }}>ai_pm_editor 산출물 뷰어 · 내부 도구</p>
       </footer>
