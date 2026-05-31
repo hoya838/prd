@@ -23,6 +23,13 @@ async function verifyPassword(password: string, stored: string): Promise<boolean
 }
 
 function loadUsers(): StoredUser[] {
+  if (process.env.CREDENTIALS_USERS) {
+    try {
+      return JSON.parse(process.env.CREDENTIALS_USERS) as StoredUser[];
+    } catch {
+      return [];
+    }
+  }
   const filePath = path.join(process.cwd(), "data", "users.json");
   try {
     return JSON.parse(fs.readFileSync(filePath, "utf-8")) as StoredUser[];

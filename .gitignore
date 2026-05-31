@@ -42,3 +42,6 @@ next-env.d.ts
 
 # backup files
 *.bak
+
+# credentials (managed via CREDENTIALS_USERS env var on Vercel)
+data/users.json
