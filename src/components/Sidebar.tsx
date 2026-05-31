@@ -84,7 +84,7 @@ export function Sidebar({
           </p>
         </div>
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={() => signOut({ callbackUrl: "/" })}
           title="로그아웃"
           className="shrink-0 text-[#a09c92] hover:text-[#26251e] transition-colors"
         >

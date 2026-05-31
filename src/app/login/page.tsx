@@ -25,7 +25,7 @@ function LoginContent() {
 
         <Button
           className="w-full"
-          onClick={() => signIn("google", { callbackUrl: "/" })}
+          onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
         >
           Google로 로그인
         </Button>
