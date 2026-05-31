@@ -34,7 +34,7 @@ export default function Home() {
   const selectedProject = projects.find((p) => p.name === selected) ?? null;
 
   return (
-    <div className="flex h-screen bg-[#f7f7f4]">
+    <div className="flex h-screen" style={{ background: "#000" }}>
       <Sidebar
         projects={projects}
         selected={selected}
@@ -44,19 +44,33 @@ export default function Home() {
       <div className="flex flex-col flex-1 min-w-0">
         {selectedProject ? (
           <>
-            <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e6e5e0] bg-white shrink-0">
-              <h1 className="text-sm font-semibold text-[#26251e] tracking-tight">{selectedProject.name}</h1>
-              <div className="ml-auto flex gap-0.5">
+            {/* Topbar */}
+            <div
+              className="flex items-center gap-3 px-6 py-3 shrink-0"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "#000" }}
+            >
+              <h1 style={{ fontSize: 13, fontWeight: 600, color: "#fff", letterSpacing: "-0.3px" }}>
+                {selectedProject.name}
+              </h1>
+              <div className="ml-auto flex gap-1">
                 {VIEWS.map(({ key, label }) => (
                   <button
                     key={key}
                     onClick={() => setView(key)}
-                    style={{ borderRadius: "8px" }}
-                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                      view === key
-                        ? "bg-[#26251e] text-white"
-                        : "text-[#807d72] hover:bg-[#f7f7f4] hover:text-[#26251e]"
-                    }`}
+                    style={{
+                      borderRadius: 100,
+                      padding: "5px 14px",
+                      fontSize: 12,
+                      fontWeight: 500,
+                      letterSpacing: "-0.12px",
+                      background: view === key ? "#fff" : "transparent",
+                      color: view === key ? "#000" : "#555",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={e => { if (view !== key) (e.currentTarget as HTMLElement).style.color = "#999"; }}
+                    onMouseLeave={e => { if (view !== key) (e.currentTarget as HTMLElement).style.color = "#555"; }}
                   >
                     {label}
                   </button>
@@ -70,7 +84,7 @@ export default function Home() {
             </div>
           </>
         ) : (
-          <div className="flex flex-1 items-center justify-center text-[#807d72] text-sm">
+          <div className="flex flex-1 items-center justify-center" style={{ fontSize: 14, color: "#444" }}>
             {loading ? "불러오는 중..." : "프로젝트를 선택하세요"}
           </div>
         )}

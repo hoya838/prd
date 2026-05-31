@@ -9,15 +9,16 @@ import type { ProjectInfo } from "@/app/api/projects/route";
 
 const SCREEN_W = 180;
 const SCREEN_H = 80;
-const MODAL_W = 150;
-const MODAL_H = 60;
+const MODAL_W  = 150;
+const MODAL_H  = 60;
 
-const ROLE_COLOR: Record<string, { node: string; badge: string }> = {
-  user:   { node: "border-[#9fbbe0] bg-[#9fbbe0]/10",   badge: "bg-[#9fbbe0]/20 text-[#26251e]" },
-  shared: { node: "border-[#c0a8dd] bg-[#c0a8dd]/10",  badge: "bg-[#c0a8dd]/20 text-[#26251e]" },
-  admin:  { node: "border-[#dfa88f] bg-[#dfa88f]/10",   badge: "bg-[#dfa88f]/20 text-[#26251e]" },
-  seller: { node: "border-[#9fc9a2] bg-[#9fc9a2]/10",  badge: "bg-[#9fc9a2]/20 text-[#26251e]" },
-  modal:  { node: "border-[#e6e5e0] bg-white",          badge: "bg-[#e6e5e0] text-[#807d72]" },
+// AI timeline pastels adapted for dark canvas
+const ROLE_COLOR: Record<string, { border: string; bg: string; badgeBg: string; badgeText: string }> = {
+  user:   { border: "#9fbbe0", bg: "rgba(159,187,224,0.06)", badgeBg: "rgba(159,187,224,0.15)", badgeText: "#9fbbe0" },
+  shared: { border: "#c0a8dd", bg: "rgba(192,168,221,0.06)", badgeBg: "rgba(192,168,221,0.15)", badgeText: "#c0a8dd" },
+  admin:  { border: "#dfa88f", bg: "rgba(223,168,143,0.06)", badgeBg: "rgba(223,168,143,0.15)", badgeText: "#dfa88f" },
+  seller: { border: "#9fc9a2", bg: "rgba(159,201,162,0.06)", badgeBg: "rgba(159,201,162,0.15)", badgeText: "#9fc9a2" },
+  modal:  { border: "rgba(255,255,255,0.12)", bg: "rgba(255,255,255,0.03)", badgeBg: "rgba(255,255,255,0.08)", badgeText: "#555" },
 };
 
 function getColor(node: GraphNode) {
@@ -25,13 +26,7 @@ function getColor(node: GraphNode) {
   return ROLE_COLOR[node.role] ?? ROLE_COLOR.user;
 }
 
-function ConnectionSvg({
-  edges, nodes, size,
-}: {
-  edges: GraphEdge[];
-  nodes: GraphNode[];
-  size: { width: number; height: number };
-}) {
+function ConnectionSvg({ edges, nodes, size }: { edges: GraphEdge[]; nodes: GraphNode[]; size: { width: number; height: number } }) {
   return (
     <svg
       className="absolute top-0 left-0 pointer-events-none"
@@ -42,7 +37,7 @@ function ConnectionSvg({
     >
       <defs>
         <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L6,3 z" fill="#cfcdc4" />
+          <path d="M0,0 L0,6 L6,3 z" fill="rgba(255,255,255,0.2)" />
         </marker>
       </defs>
       {edges.map((edge, i) => {
@@ -75,7 +70,7 @@ function ConnectionSvg({
             key={i}
             d={path}
             fill="none"
-            stroke="#cfcdc4"
+            stroke="rgba(255,255,255,0.12)"
             strokeWidth={isModal ? 1 : 1.5}
             strokeDasharray={edge.dashed ? "5,4" : "none"}
             strokeLinecap="round"
@@ -136,23 +131,23 @@ export function ScreenFlowView({ project }: { project: ProjectInfo }) {
 
   const roles = ["all", ...Array.from(new Set(nodes.filter(n => n.type === "screen").map(n => n.role)))];
   const visibleNodes = filter === "all" ? nodes : nodes.filter(n => n.role === filter || n.type === "modal");
-  const visibleIds = new Set(visibleNodes.map(n => n.id));
+  const visibleIds   = new Set(visibleNodes.map(n => n.id));
   const visibleEdges = edges.filter(e => visibleIds.has(e.from) && visibleIds.has(e.to));
 
-  if (loading) return <div className="flex items-center justify-center h-full text-sm text-[#807d72] bg-[#f7f7f4]">그래프 로딩 중...</div>;
-  if (error)   return <div className="flex items-center justify-center h-full text-sm text-[#cf2d56] bg-[#f7f7f4]">{error}</div>;
-  if (nodes.length === 0) return <div className="flex items-center justify-center h-full text-sm text-[#807d72] bg-[#f7f7f4]">IA_Structure.csv 없음</div>;
+  if (loading) return <div className="flex items-center justify-center h-full" style={{ fontSize: 14, color: "#444", background: "#000" }}>그래프 로딩 중...</div>;
+  if (error)   return <div className="flex items-center justify-center h-full" style={{ fontSize: 14, color: "#cf2d56", background: "#000" }}>{error}</div>;
+  if (nodes.length === 0) return <div className="flex items-center justify-center h-full" style={{ fontSize: 14, color: "#444", background: "#000" }}>IA_Structure.csv 없음</div>;
 
   const screenCount = nodes.filter(n => n.type === "screen").length;
   const modalCount  = nodes.filter(n => n.type === "modal").length;
 
   return (
-    <div className="flex flex-col h-full bg-[#f7f7f4]">
+    <div className="flex flex-col h-full" style={{ background: "#000" }}>
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 py-2.5 border-b border-[#e6e5e0] bg-white shrink-0">
+      <div className="flex items-center gap-3 px-5 py-2.5 shrink-0" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", background: "#000" }}>
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#a09c92]" />
-          <span className="text-[11px] font-semibold text-[#807d72] uppercase tracking-wider">화면 플로우</span>
+          <Layers className="w-4 h-4" style={{ color: "#444" }} />
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#444", letterSpacing: "0.08em", textTransform: "uppercase" }}>화면 플로우</span>
         </div>
 
         <div className="flex items-center gap-1 ml-2">
@@ -160,42 +155,48 @@ export function ScreenFlowView({ project }: { project: ProjectInfo }) {
             <button
               key={r}
               onClick={() => setFilter(r)}
-              style={{ borderRadius: "8px" }}
-              className={`px-2.5 py-1 text-xs font-medium transition-colors ${
-                filter === r
-                  ? "bg-[#26251e] text-white"
-                  : "text-[#807d72] hover:bg-[#f7f7f4] hover:text-[#26251e]"
-              }`}
+              style={{
+                padding: "4px 12px",
+                borderRadius: 100,
+                fontSize: 11,
+                fontWeight: 500,
+                background: filter === r ? "#fff" : "transparent",
+                color:      filter === r ? "#000" : "#555",
+                border:     "none",
+                cursor:     "pointer",
+                transition: "all 0.15s",
+                letterSpacing: "-0.11px",
+              }}
             >
               {r === "all" ? "전체" : r}
             </button>
           ))}
         </div>
 
-        <div className="ml-auto flex items-center gap-4 text-[11px] text-[#a09c92]">
+        <div className="ml-auto flex items-center gap-4" style={{ fontSize: 10, color: "#444" }}>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-sm bg-[#9fbbe0]" />화면 {screenCount}
+            <span className="w-2 h-2 rounded-sm" style={{ background: "#9fbbe0" }} />화면 {screenCount}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-sm bg-[#e6e5e0]" />모달 {modalCount}
+            <span className="w-2 h-2 rounded-sm" style={{ background: "#262626" }} />모달 {modalCount}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-4 border-t border-dashed border-[#cfcdc4]" />파생/인증
+            <span className="w-4 border-t border-dashed" style={{ borderColor: "rgba(255,255,255,0.15)" }} />파생/인증
           </span>
         </div>
       </div>
 
       {/* Canvas */}
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto bg-[#f7f7f4]">
+        <div className="flex-1 overflow-auto" style={{ background: "#0a0a0a" }}>
           <div className="relative" style={{ minWidth: contentSize.width, minHeight: contentSize.height }}>
             <ConnectionSvg edges={visibleEdges} nodes={visibleNodes} size={contentSize} />
 
             {visibleNodes.map((node) => {
-              const isModal  = node.type === "modal";
-              const w        = isModal ? MODAL_W : SCREEN_W;
-              const h        = isModal ? MODAL_H : SCREEN_H;
-              const color    = getColor(node);
+              const isModal    = node.type === "modal";
+              const w          = isModal ? MODAL_W : SCREEN_W;
+              const h          = isModal ? MODAL_H : SCREEN_H;
+              const color      = getColor(node);
               const isSelected = selected?.id === node.id;
 
               return (
@@ -217,37 +218,37 @@ export function ScreenFlowView({ project }: { project: ProjectInfo }) {
                 >
                   <div
                     onClick={() => setSelected(isSelected ? null : node)}
-                    className={`w-full border p-2.5 cursor-pointer transition-all bg-white
-                      ${color.node}
-                      ${isModal ? "opacity-80" : ""}
-                    `}
+                    className="w-full p-2.5 cursor-pointer transition-all"
                     style={{
                       height: h,
-                      borderRadius: "12px",
-                      boxShadow: isSelected
-                        ? "0 0 0 2px #26251e, 0 4px 12px rgba(38,37,30,0.08)"
-                        : "0 1px 3px rgba(38,37,30,0.04)",
+                      borderRadius: 12,
+                      background: isSelected ? "#1a1a1a" : color.bg,
+                      border: isSelected
+                        ? "1px solid rgba(255,255,255,0.25)"
+                        : `1px solid ${color.border}`,
+                      opacity: isModal ? 0.7 : 1,
+                      boxShadow: isSelected ? "0 0 0 1px rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.4)" : "none",
                     }}
                   >
                     <div className="flex items-start justify-between gap-1 h-full">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1 mb-1">
                           {isModal ? (
-                            <span className="text-[9px] uppercase tracking-widest text-[#a09c92] bg-[#f7f7f4] px-1.5 py-0.5 rounded font-semibold">
+                            <span style={{ fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 6px", borderRadius: 4, fontWeight: 600, background: color.badgeBg, color: color.badgeText }}>
                               modal
                             </span>
                           ) : (
-                            <span className={`text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded font-semibold ${color.badge}`}>
+                            <span style={{ fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", padding: "2px 6px", borderRadius: 4, fontWeight: 600, background: color.badgeBg, color: color.badgeText }}>
                               {node.role}
                             </span>
                           )}
-                          {node.authRequired && <Lock className="w-2.5 h-2.5 text-[#c08532] shrink-0" />}
-                          {!node.authRequired && !isModal && <Unlock className="w-2.5 h-2.5 text-[#e6e5e0] shrink-0" />}
+                          {node.authRequired  && <Lock   className="w-2.5 h-2.5 shrink-0" style={{ color: "#c08532" }} />}
+                          {!node.authRequired && !isModal && <Unlock className="w-2.5 h-2.5 shrink-0" style={{ color: "#262626" }} />}
                         </div>
-                        <p className="text-[11px] font-semibold leading-tight truncate text-[#26251e]">{node.label}</p>
-                        {!isModal && <p className="text-[9px] text-[#a09c92] mt-0.5 font-mono">{node.id}</p>}
+                        <p style={{ fontSize: 11, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", margin: 0 }}>{node.label}</p>
+                        {!isModal && <p style={{ fontSize: 9, color: "#444", marginTop: 2, fontFamily: "var(--font-mono)" }}>{node.id}</p>}
                       </div>
-                      {isSelected && <ExternalLink className="w-3 h-3 text-[#807d72] shrink-0 mt-0.5" />}
+                      {isSelected && <ExternalLink className="w-3 h-3 shrink-0 mt-0.5" style={{ color: "#555" }} />}
                     </div>
                   </div>
                 </motion.div>
@@ -263,33 +264,39 @@ export function ScreenFlowView({ project }: { project: ProjectInfo }) {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 300, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            className="w-72 shrink-0 border-l border-[#e6e5e0] bg-white overflow-y-auto"
+            className="w-72 shrink-0 overflow-y-auto"
+            style={{ borderLeft: "1px solid rgba(255,255,255,0.06)", background: "#0a0a0a" }}
           >
-            <div className="flex items-start justify-between px-5 py-4 border-b border-[#e6e5e0]">
+            <div className="flex items-start justify-between px-5 py-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
               <div>
-                <p className="text-[10px] text-[#a09c92] uppercase tracking-wider">{selected.type} · {selected.role}</p>
-                <p className="text-sm font-semibold text-[#26251e] mt-0.5">{selected.label}</p>
-                <p className="text-[11px] font-mono text-[#a09c92] mt-0.5">{selected.id}</p>
+                <p style={{ fontSize: 10, color: "#444", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>{selected.type} · {selected.role}</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", margin: "4px 0 0" }}>{selected.label}</p>
+                <p style={{ fontSize: 11, color: "#444", margin: "2px 0 0", fontFamily: "var(--font-mono)" }}>{selected.id}</p>
               </div>
-              <button onClick={() => setSelected(null)} className="text-[#a09c92] hover:text-[#26251e] text-lg leading-none mt-0.5">×</button>
+              <button
+                onClick={() => setSelected(null)}
+                style={{ color: "#444", background: "none", border: "none", cursor: "pointer", fontSize: 18, lineHeight: 1, marginTop: 2, padding: 4 }}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#fff")}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "#444")}
+              >×</button>
             </div>
-            <div className="p-5 space-y-4 text-sm">
-              <div className="flex items-center gap-2">
+            <div className="p-5 space-y-4">
+              <div>
                 {selected.authRequired ? (
-                  <span className="text-[11px] px-2.5 py-1 rounded-full border border-[#c08532]/30 text-[#c08532] bg-[#c08532]/10 font-semibold uppercase tracking-wider">
+                  <span style={{ fontSize: 11, padding: "4px 12px", borderRadius: 100, border: "1px solid rgba(192,133,50,0.3)", color: "#c08532", background: "rgba(192,133,50,0.1)", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
                     🔒 로그인 필요
                   </span>
                 ) : (
-                  <span className="text-[11px] px-2.5 py-1 rounded-full border border-[#e6e5e0] text-[#807d72] uppercase tracking-wider font-semibold">
+                  <span style={{ fontSize: 11, padding: "4px 12px", borderRadius: 100, border: "1px solid rgba(255,255,255,0.1)", color: "#555", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
                     공개
                   </span>
                 )}
               </div>
               {selected.description && (
-                <p className="text-xs text-[#807d72] leading-relaxed">{selected.description}</p>
+                <p style={{ fontSize: 12, color: "#555", lineHeight: 1.6, margin: 0 }}>{selected.description}</p>
               )}
               <div>
-                <p className="text-[10px] font-semibold text-[#a09c92] mb-2 uppercase tracking-wider">연결 화면</p>
+                <p style={{ fontSize: 10, fontWeight: 600, color: "#333", marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase" }}>연결 화면</p>
                 <div className="space-y-1">
                   {edges
                     .filter(e => e.from === selected.id || e.to === selected.id)
@@ -301,14 +308,16 @@ export function ScreenFlowView({ project }: { project: ProjectInfo }) {
                         <button
                           key={i}
                           onClick={() => setSelected(other)}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-[#f7f7f4] transition-colors"
-                          style={{ borderRadius: "8px" }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-left transition-colors"
+                          style={{ borderRadius: 8, background: "transparent", border: "none", cursor: "pointer" }}
+                          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)")}
+                          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}
                         >
-                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider ${otherColor.badge}`}>
+                          <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 4, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", background: otherColor.badgeBg, color: otherColor.badgeText, flexShrink: 0 }}>
                             {other.role}
                           </span>
-                          <span className="text-xs text-[#5a5852] truncate">{other.label}</span>
-                          <span className="ml-auto text-[9px] text-[#a09c92] shrink-0">{e.from === selected.id ? "→" : "←"} {e.label}</span>
+                          <span style={{ fontSize: 12, color: "#666", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{other.label}</span>
+                          <span style={{ fontSize: 9, color: "#333", flexShrink: 0 }}>{e.from === selected.id ? "→" : "←"} {e.label}</span>
                         </button>
                       );
                     })}
