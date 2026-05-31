@@ -14,7 +14,7 @@ interface WorkflowNode {
   id: ArtifactKey;
   label: string;
   desc: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   dot: string;
   type: string;
   position: { x: number; y: number };
