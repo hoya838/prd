@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, Circle, FolderOpen } from "lucide-react";
+import { CheckCircle2, Circle, FolderOpen, LogOut } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import type { ProjectInfo } from "@/app/api/projects/route";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -21,6 +22,8 @@ export function Sidebar({
   onSelect: (name: string) => void;
   loading: boolean;
 }) {
+  const { data: session } = useSession();
+
   return (
     <div className="w-60 shrink-0 border-r border-[#e6e5e0] bg-[#f7f7f4] flex flex-col">
       <div className="px-5 py-5 border-b border-[#e6e5e0]">
@@ -69,6 +72,25 @@ export function Sidebar({
           </div>
         )}
       </ScrollArea>
+
+      {/* User + Logout */}
+      <div className="border-t border-[#e6e5e0] px-4 py-3 flex items-center gap-2.5">
+        {session?.user?.image && (
+          <img src={session.user.image} alt="" className="w-6 h-6 rounded-full shrink-0" />
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-medium text-[#26251e] truncate">
+            {session?.user?.name ?? session?.user?.email ?? ""}
+          </p>
+        </div>
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          title="로그아웃"
+          className="shrink-0 text-[#a09c92] hover:text-[#26251e] transition-colors"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
