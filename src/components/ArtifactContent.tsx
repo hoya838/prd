@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Papa from "papaparse";
-import { Badge } from "@/components/ui/badge";
 import type { ProjectInfo } from "@/app/api/projects/route";
 
 type ArtifactKey = keyof ProjectInfo["artifacts"];
@@ -12,14 +11,14 @@ type ArtifactKey = keyof ProjectInfo["artifacts"];
 function CsvTable({ content }: { content: string }) {
   const result = Papa.parse<string[]>(content, { skipEmptyLines: true });
   const [header, ...rows] = result.data;
-  if (!header) return <p className="text-zinc-400 text-sm p-4">내용 없음</p>;
+  if (!header) return <p className="text-[#807d72] text-sm p-6">내용 없음</p>;
   return (
-    <div className="overflow-x-auto p-4">
-      <table className="text-sm w-full border-collapse">
+    <div className="overflow-x-auto p-6">
+      <table className="text-sm w-full border-collapse bg-white rounded-xl overflow-hidden border border-[#e6e5e0]">
         <thead>
-          <tr className="bg-zinc-100">
+          <tr className="bg-[#f7f7f4]">
             {header.map((h, i) => (
-              <th key={i} className="px-3 py-2 text-left font-medium text-zinc-700 border border-zinc-200 whitespace-nowrap">
+              <th key={i} className="px-4 py-2.5 text-left text-[11px] font-semibold text-[#807d72] uppercase tracking-wider border-b border-[#e6e5e0] whitespace-nowrap">
                 {h}
               </th>
             ))}
@@ -27,9 +26,9 @@ function CsvTable({ content }: { content: string }) {
         </thead>
         <tbody>
           {rows.map((row, ri) => (
-            <tr key={ri} className="even:bg-zinc-50">
+            <tr key={ri} className="border-b border-[#e6e5e0] last:border-0 hover:bg-[#fafaf7] transition-colors">
               {row.map((cell, ci) => (
-                <td key={ci} className="px-3 py-1.5 border border-zinc-200 text-zinc-700 align-top">
+                <td key={ci} className="px-4 py-2.5 text-[#5a5852] align-top font-mono text-xs">
                   {cell}
                 </td>
               ))}
@@ -46,25 +45,30 @@ function JsonViewer({ content }: { content: string }) {
     const parsed = JSON.parse(content);
     if (Array.isArray(parsed)) {
       return (
-        <div className="flex flex-col gap-2 p-4">
+        <div className="flex flex-col gap-2 p-6">
           {parsed.map((item, i) => (
-            <div key={i} className="border rounded-lg px-4 py-3 bg-white text-sm">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-mono text-xs text-zinc-400">{item.id ?? i + 1}</span>
-                {item.type && <Badge variant="outline" className="text-xs">{item.type}</Badge>}
+            <div key={i} className="border border-[#e6e5e0] rounded-xl px-5 py-4 bg-white text-sm">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="font-mono text-[11px] text-[#a09c92]">{item.id ?? i + 1}</span>
+                {item.type && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#e6e5e0] text-[#5a5852] uppercase tracking-wider font-semibold">
+                    {item.type}
+                  </span>
+                )}
                 {item.status && (
-                  <Badge
-                    variant="outline"
-                    className={`text-xs ${item.status === "done" ? "border-emerald-300 text-emerald-700" : ""}`}
-                  >
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold ${
+                    item.status === "done"
+                      ? "bg-[#1f8a65]/10 text-[#1f8a65]"
+                      : "bg-[#e6e5e0] text-[#5a5852]"
+                  }`}>
                     {item.status}
-                  </Badge>
+                  </span>
                 )}
               </div>
-              <p className="font-medium text-zinc-900">{item.title ?? item.name ?? JSON.stringify(item)}</p>
-              {item.description && <p className="text-zinc-500 mt-1 text-xs">{item.description}</p>}
+              <p className="font-medium text-[#26251e] text-sm">{item.title ?? item.name ?? JSON.stringify(item)}</p>
+              {item.description && <p className="text-[#807d72] mt-1.5 text-xs leading-relaxed">{item.description}</p>}
               {item.acceptance_criteria && (
-                <ul className="mt-2 list-disc list-inside text-xs text-zinc-500 space-y-0.5">
+                <ul className="mt-2.5 list-disc list-inside text-xs text-[#807d72] space-y-1">
                   {item.acceptance_criteria.map((ac: string, j: number) => (
                     <li key={j}>{ac}</li>
                   ))}
@@ -76,12 +80,12 @@ function JsonViewer({ content }: { content: string }) {
       );
     }
     return (
-      <pre className="text-xs text-zinc-700 bg-zinc-50 rounded p-4 m-4 overflow-x-auto whitespace-pre-wrap">
+      <pre className="text-xs text-[#5a5852] bg-white rounded-xl border border-[#e6e5e0] p-5 m-6 overflow-x-auto whitespace-pre-wrap font-mono">
         {JSON.stringify(parsed, null, 2)}
       </pre>
     );
   } catch {
-    return <pre className="text-xs text-red-500 p-4">{content}</pre>;
+    return <pre className="text-xs text-[#cf2d56] p-6 font-mono">{content}</pre>;
   }
 }
 
@@ -104,14 +108,27 @@ export function ArtifactContent({ project, artifactKey }: { project: string; art
       .finally(() => setLoading(false));
   }, [project, artifactKey]);
 
-  if (loading) return <div className="p-6 text-sm text-zinc-400">불러오는 중...</div>;
-  if (error) return <div className="p-6 text-sm text-red-400">{error}</div>;
+  if (loading) return <div className="p-6 text-sm text-[#a09c92]">불러오는 중...</div>;
+  if (error) return <div className="p-6 text-sm text-[#cf2d56]">{error}</div>;
   if (!data) return null;
 
   if (data.ext === "md") {
     return (
-      <div className="p-6 prose prose-sm prose-zinc max-w-none">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content}</ReactMarkdown>
+      <div className="p-6 mx-auto max-w-3xl">
+        <div className="bg-white rounded-xl border border-[#e6e5e0] p-8 prose prose-sm max-w-none
+          prose-headings:font-semibold prose-headings:text-[#26251e] prose-headings:tracking-tight
+          prose-p:text-[#5a5852] prose-p:leading-relaxed
+          prose-li:text-[#5a5852]
+          prose-strong:text-[#26251e]
+          prose-code:font-mono prose-code:text-[#26251e] prose-code:bg-[#f7f7f4] prose-code:rounded prose-code:px-1
+          prose-pre:bg-[#f7f7f4] prose-pre:border prose-pre:border-[#e6e5e0] prose-pre:rounded-xl
+          prose-a:text-[#f54e00] prose-a:no-underline hover:prose-a:underline
+          prose-hr:border-[#e6e5e0]
+          prose-table:text-[#5a5852]
+          prose-th:text-[#26251e] prose-th:font-semibold
+        ">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{data.content}</ReactMarkdown>
+        </div>
       </div>
     );
   }
@@ -119,5 +136,5 @@ export function ArtifactContent({ project, artifactKey }: { project: string; art
   if (data.ext === "csv") return <CsvTable content={data.content} />;
   if (data.ext === "json") return <JsonViewer content={data.content} />;
 
-  return <pre className="p-6 text-xs text-zinc-700">{data.content}</pre>;
+  return <pre className="p-6 text-xs text-[#5a5852] font-mono">{data.content}</pre>;
 }

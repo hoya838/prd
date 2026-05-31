@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { motion, type PanInfo } from "framer-motion";
 import { Lock, Unlock, Layers, ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import type { GraphNode, GraphEdge } from "@/app/api/projects/[project]/graph/route";
 import type { ProjectInfo } from "@/app/api/projects/route";
 
@@ -14,11 +13,11 @@ const MODAL_W = 150;
 const MODAL_H = 60;
 
 const ROLE_COLOR: Record<string, { node: string; badge: string }> = {
-  user:   { node: "border-blue-400/50 bg-blue-400/10 text-blue-600",     badge: "border-blue-300 text-blue-600" },
-  shared: { node: "border-violet-400/50 bg-violet-400/10 text-violet-600", badge: "border-violet-300 text-violet-600" },
-  admin:  { node: "border-red-400/50 bg-red-400/10 text-red-600",         badge: "border-red-300 text-red-600" },
-  seller: { node: "border-green-400/50 bg-green-400/10 text-green-600",   badge: "border-green-300 text-green-600" },
-  modal:  { node: "border-zinc-300 bg-zinc-50 text-zinc-600",             badge: "border-zinc-200 text-zinc-500" },
+  user:   { node: "border-[#9fbbe0] bg-[#9fbbe0]/10",   badge: "bg-[#9fbbe0]/20 text-[#26251e]" },
+  shared: { node: "border-[#c0a8dd] bg-[#c0a8dd]/10",  badge: "bg-[#c0a8dd]/20 text-[#26251e]" },
+  admin:  { node: "border-[#dfa88f] bg-[#dfa88f]/10",   badge: "bg-[#dfa88f]/20 text-[#26251e]" },
+  seller: { node: "border-[#9fc9a2] bg-[#9fc9a2]/10",  badge: "bg-[#9fc9a2]/20 text-[#26251e]" },
+  modal:  { node: "border-[#e6e5e0] bg-white",          badge: "bg-[#e6e5e0] text-[#807d72]" },
 };
 
 function getColor(node: GraphNode) {
@@ -27,9 +26,7 @@ function getColor(node: GraphNode) {
 }
 
 function ConnectionSvg({
-  edges,
-  nodes,
-  size,
+  edges, nodes, size,
 }: {
   edges: GraphEdge[];
   nodes: GraphNode[];
@@ -45,7 +42,7 @@ function ConnectionSvg({
     >
       <defs>
         <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L6,3 z" fill="currentColor" opacity="0.4" />
+          <path d="M0,0 L0,6 L6,3 z" fill="#cfcdc4" />
         </marker>
       </defs>
       {edges.map((edge, i) => {
@@ -66,7 +63,6 @@ function ConnectionSvg({
 
         let path: string;
         if (isModal) {
-          // vertical drop for modals
           path = `M${from.position.x + fw / 2},${from.position.y + fh} L${to.position.x + tw / 2},${to.position.y}`;
         } else {
           const cpx1 = sx + (ex - sx) * 0.5;
@@ -79,13 +75,12 @@ function ConnectionSvg({
             key={i}
             d={path}
             fill="none"
-            stroke="currentColor"
-            strokeWidth={isModal ? 1.5 : 2}
-            strokeDasharray={edge.dashed ? "6,4" : "none"}
+            stroke="#cfcdc4"
+            strokeWidth={isModal ? 1 : 1.5}
+            strokeDasharray={edge.dashed ? "5,4" : "none"}
             strokeLinecap="round"
-            opacity={isModal ? 0.25 : 0.35}
+            opacity={isModal ? 0.5 : 0.8}
             markerEnd="url(#arrow)"
-            className="text-foreground"
           />
         );
       })}
@@ -144,30 +139,32 @@ export function ScreenFlowView({ project }: { project: ProjectInfo }) {
   const visibleIds = new Set(visibleNodes.map(n => n.id));
   const visibleEdges = edges.filter(e => visibleIds.has(e.from) && visibleIds.has(e.to));
 
-  if (loading) return <div className="flex items-center justify-center h-full text-sm text-zinc-400">그래프 로딩 중...</div>;
-  if (error)   return <div className="flex items-center justify-center h-full text-sm text-red-400">{error}</div>;
-  if (nodes.length === 0) return <div className="flex items-center justify-center h-full text-sm text-zinc-400">IA_Structure.csv 없음</div>;
+  if (loading) return <div className="flex items-center justify-center h-full text-sm text-[#807d72] bg-[#f7f7f4]">그래프 로딩 중...</div>;
+  if (error)   return <div className="flex items-center justify-center h-full text-sm text-[#cf2d56] bg-[#f7f7f4]">{error}</div>;
+  if (nodes.length === 0) return <div className="flex items-center justify-center h-full text-sm text-[#807d72] bg-[#f7f7f4]">IA_Structure.csv 없음</div>;
 
   const screenCount = nodes.filter(n => n.type === "screen").length;
   const modalCount  = nodes.filter(n => n.type === "modal").length;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[#f7f7f4]">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b bg-white shrink-0">
+      <div className="flex items-center gap-3 px-5 py-2.5 border-b border-[#e6e5e0] bg-white shrink-0">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-zinc-400" />
-          <span className="text-xs font-medium text-zinc-600 uppercase tracking-widest">화면 플로우</span>
+          <Layers className="w-4 h-4 text-[#a09c92]" />
+          <span className="text-[11px] font-semibold text-[#807d72] uppercase tracking-wider">화면 플로우</span>
         </div>
 
-        {/* Role filter */}
         <div className="flex items-center gap-1 ml-2">
           {roles.map((r) => (
             <button
               key={r}
               onClick={() => setFilter(r)}
-              className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
-                filter === r ? "bg-zinc-900 text-white" : "text-zinc-500 hover:bg-zinc-100"
+              style={{ borderRadius: "8px" }}
+              className={`px-2.5 py-1 text-xs font-medium transition-colors ${
+                filter === r
+                  ? "bg-[#26251e] text-white"
+                  : "text-[#807d72] hover:bg-[#f7f7f4] hover:text-[#26251e]"
               }`}
             >
               {r === "all" ? "전체" : r}
@@ -175,22 +172,22 @@ export function ScreenFlowView({ project }: { project: ProjectInfo }) {
           ))}
         </div>
 
-        <div className="ml-auto flex items-center gap-4 text-[11px] text-zinc-400">
+        <div className="ml-auto flex items-center gap-4 text-[11px] text-[#a09c92]">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-sm bg-blue-400" />화면 {screenCount}
+            <span className="w-2 h-2 rounded-sm bg-[#9fbbe0]" />화면 {screenCount}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-sm bg-zinc-300" />모달 {modalCount}
+            <span className="w-2 h-2 rounded-sm bg-[#e6e5e0]" />모달 {modalCount}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-4 border-t border-dashed border-zinc-400" />파생/인증
+            <span className="w-4 border-t border-dashed border-[#cfcdc4]" />파생/인증
           </span>
         </div>
       </div>
 
       {/* Canvas */}
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto bg-zinc-50/50">
+        <div className="flex-1 overflow-auto bg-[#f7f7f4]">
           <div className="relative" style={{ minWidth: contentSize.width, minHeight: contentSize.height }}>
             <ConnectionSvg edges={visibleEdges} nodes={visibleNodes} size={contentSize} />
 
@@ -212,36 +209,45 @@ export function ScreenFlowView({ project }: { project: ProjectInfo }) {
                   onDragEnd={() => { setDragging(null); dragStart.current = null; }}
                   style={{ x: node.position.x, y: node.position.y, width: w, transformOrigin: "0 0" }}
                   className="absolute cursor-grab"
-                  initial={{ scale: 0.9, opacity: 0 }}
+                  initial={{ scale: 0.92, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.15 }}
                   whileHover={{ scale: 1.03, zIndex: 10 }}
-                  whileDrag={{ scale: 1.06, zIndex: 50, cursor: "grabbing" }}
+                  whileDrag={{ scale: 1.05, zIndex: 50, cursor: "grabbing" }}
                 >
                   <div
                     onClick={() => setSelected(isSelected ? null : node)}
-                    className={`w-full rounded-lg border-2 p-2.5 cursor-pointer transition-all bg-white shadow-sm
+                    className={`w-full border p-2.5 cursor-pointer transition-all bg-white
                       ${color.node}
-                      ${isSelected ? "ring-2 ring-offset-1 ring-zinc-700 shadow-md" : "hover:shadow-md"}
                       ${isModal ? "opacity-80" : ""}
                     `}
-                    style={{ height: h }}
+                    style={{
+                      height: h,
+                      borderRadius: "12px",
+                      boxShadow: isSelected
+                        ? "0 0 0 2px #26251e, 0 4px 12px rgba(38,37,30,0.08)"
+                        : "0 1px 3px rgba(38,37,30,0.04)",
+                    }}
                   >
                     <div className="flex items-start justify-between gap-1 h-full">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1 mb-1">
                           {isModal ? (
-                            <span className="text-[8px] uppercase tracking-widest text-zinc-400 bg-zinc-100 px-1 rounded">modal</span>
+                            <span className="text-[9px] uppercase tracking-widest text-[#a09c92] bg-[#f7f7f4] px-1.5 py-0.5 rounded font-semibold">
+                              modal
+                            </span>
                           ) : (
-                            <span className={`text-[8px] uppercase tracking-widest px-1 rounded border ${color.badge}`}>{node.role}</span>
+                            <span className={`text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded font-semibold ${color.badge}`}>
+                              {node.role}
+                            </span>
                           )}
-                          {node.authRequired && <Lock className="w-2.5 h-2.5 text-amber-500 shrink-0" />}
-                          {!node.authRequired && !isModal && <Unlock className="w-2.5 h-2.5 text-zinc-300 shrink-0" />}
+                          {node.authRequired && <Lock className="w-2.5 h-2.5 text-[#c08532] shrink-0" />}
+                          {!node.authRequired && !isModal && <Unlock className="w-2.5 h-2.5 text-[#e6e5e0] shrink-0" />}
                         </div>
-                        <p className="text-[11px] font-semibold leading-tight truncate text-zinc-800">{node.label}</p>
-                        {!isModal && <p className="text-[9px] text-zinc-400 mt-0.5 font-mono">{node.id}</p>}
+                        <p className="text-[11px] font-semibold leading-tight truncate text-[#26251e]">{node.label}</p>
+                        {!isModal && <p className="text-[9px] text-[#a09c92] mt-0.5 font-mono">{node.id}</p>}
                       </div>
-                      {isSelected && <ExternalLink className="w-3 h-3 text-zinc-400 shrink-0 mt-0.5" />}
+                      {isSelected && <ExternalLink className="w-3 h-3 text-[#807d72] shrink-0 mt-0.5" />}
                     </div>
                   </div>
                 </motion.div>
@@ -253,48 +259,56 @@ export function ScreenFlowView({ project }: { project: ProjectInfo }) {
         {/* Detail panel */}
         {selected && (
           <motion.div
-            initial={{ x: 320, opacity: 0 }}
+            initial={{ x: 300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 320, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="w-72 shrink-0 border-l bg-white overflow-y-auto"
+            exit={{ x: 300, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 320, damping: 30 }}
+            className="w-72 shrink-0 border-l border-[#e6e5e0] bg-white overflow-y-auto"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b">
+            <div className="flex items-start justify-between px-5 py-4 border-b border-[#e6e5e0]">
               <div>
-                <p className="text-[10px] text-zinc-400 uppercase tracking-widest">{selected.type} · {selected.role}</p>
-                <p className="text-sm font-semibold text-zinc-900 mt-0.5">{selected.label}</p>
-                <p className="text-xs font-mono text-zinc-400 mt-0.5">{selected.id}</p>
+                <p className="text-[10px] text-[#a09c92] uppercase tracking-wider">{selected.type} · {selected.role}</p>
+                <p className="text-sm font-semibold text-[#26251e] mt-0.5">{selected.label}</p>
+                <p className="text-[11px] font-mono text-[#a09c92] mt-0.5">{selected.id}</p>
               </div>
-              <button onClick={() => setSelected(null)} className="text-zinc-400 hover:text-zinc-700">×</button>
+              <button onClick={() => setSelected(null)} className="text-[#a09c92] hover:text-[#26251e] text-lg leading-none mt-0.5">×</button>
             </div>
-            <div className="p-4 space-y-3 text-sm">
+            <div className="p-5 space-y-4 text-sm">
               <div className="flex items-center gap-2">
                 {selected.authRequired ? (
-                  <Badge variant="outline" className="border-amber-300 text-amber-700 text-xs">🔒 로그인 필요</Badge>
+                  <span className="text-[11px] px-2.5 py-1 rounded-full border border-[#c08532]/30 text-[#c08532] bg-[#c08532]/10 font-semibold uppercase tracking-wider">
+                    🔒 로그인 필요
+                  </span>
                 ) : (
-                  <Badge variant="outline" className="border-zinc-200 text-zinc-500 text-xs">공개</Badge>
+                  <span className="text-[11px] px-2.5 py-1 rounded-full border border-[#e6e5e0] text-[#807d72] uppercase tracking-wider font-semibold">
+                    공개
+                  </span>
                 )}
               </div>
               {selected.description && (
-                <p className="text-xs text-zinc-500 leading-relaxed">{selected.description}</p>
+                <p className="text-xs text-[#807d72] leading-relaxed">{selected.description}</p>
               )}
               <div>
-                <p className="text-xs font-medium text-zinc-500 mb-1.5 uppercase tracking-wider">연결 화면</p>
+                <p className="text-[10px] font-semibold text-[#a09c92] mb-2 uppercase tracking-wider">연결 화면</p>
                 <div className="space-y-1">
                   {edges
                     .filter(e => e.from === selected.id || e.to === selected.id)
                     .map((e, i) => {
                       const other = nodes.find(n => n.id === (e.from === selected.id ? e.to : e.from));
                       if (!other) return null;
+                      const otherColor = getColor(other);
                       return (
                         <button
                           key={i}
                           onClick={() => setSelected(other)}
-                          className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded text-left hover:bg-zinc-50 transition-colors"
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-[#f7f7f4] transition-colors"
+                          style={{ borderRadius: "8px" }}
                         >
-                          <span className={`text-[9px] px-1 rounded border ${getColor(other).badge}`}>{other.role}</span>
-                          <span className="text-xs text-zinc-700 truncate">{other.label}</span>
-                          <span className="ml-auto text-[9px] text-zinc-400">{e.from === selected.id ? "→" : "←"} {e.label}</span>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider ${otherColor.badge}`}>
+                            {other.role}
+                          </span>
+                          <span className="text-xs text-[#5a5852] truncate">{other.label}</span>
+                          <span className="ml-auto text-[9px] text-[#a09c92] shrink-0">{e.from === selected.id ? "→" : "←"} {e.label}</span>
                         </button>
                       );
                     })}

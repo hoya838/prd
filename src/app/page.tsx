@@ -34,7 +34,7 @@ export default function Home() {
   const selectedProject = projects.find((p) => p.name === selected) ?? null;
 
   return (
-    <div className="flex h-screen bg-zinc-50 font-sans">
+    <div className="flex h-screen bg-[#f7f7f4]">
       <Sidebar
         projects={projects}
         selected={selected}
@@ -44,17 +44,18 @@ export default function Home() {
       <div className="flex flex-col flex-1 min-w-0">
         {selectedProject ? (
           <>
-            <div className="flex items-center gap-2 px-5 py-2.5 border-b bg-white shrink-0">
-              <h1 className="text-base font-semibold text-zinc-800">{selectedProject.name}</h1>
-              <div className="ml-auto flex gap-1">
+            <div className="flex items-center gap-3 px-6 py-3 border-b border-[#e6e5e0] bg-white shrink-0">
+              <h1 className="text-sm font-semibold text-[#26251e] tracking-tight">{selectedProject.name}</h1>
+              <div className="ml-auto flex gap-0.5">
                 {VIEWS.map(({ key, label }) => (
                   <button
                     key={key}
                     onClick={() => setView(key)}
-                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                    style={{ borderRadius: "8px" }}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
                       view === key
-                        ? "bg-zinc-900 text-white"
-                        : "text-zinc-500 hover:bg-zinc-100"
+                        ? "bg-[#26251e] text-white"
+                        : "text-[#807d72] hover:bg-[#f7f7f4] hover:text-[#26251e]"
                     }`}
                   >
                     {label}
@@ -69,7 +70,7 @@ export default function Home() {
             </div>
           </>
         ) : (
-          <div className="flex flex-1 items-center justify-center text-zinc-400 text-sm">
+          <div className="flex flex-1 items-center justify-center text-[#807d72] text-sm">
             {loading ? "불러오는 중..." : "프로젝트를 선택하세요"}
           </div>
         )}
