@@ -6,6 +6,7 @@ import { motion, useScroll, useTransform, AnimatePresence, type Variants } from 
 import { useRouter } from "next/navigation";
 import { ArrowRight, FileText, Layers, GitBranch, Menu, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 // ── Design tokens (design.md) ──────────────────────────────────────────────
 const C = {
@@ -102,13 +103,8 @@ function Header() {
         style={{ maxWidth: 1200 }}
       >
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
-          <div
-            className="flex items-center justify-center"
-            style={{ width: 28, height: 28, borderRadius: 8, background: C.surface2, border: `1px solid ${C.hairline}` }}
-          >
-            <FileText style={{ width: 14, height: 14, color: C.ink }} />
-          </div>
+        <Link href="/" className="flex items-center gap-2" style={{ textDecoration: "none" }}>
+          <Image src="/logo.png" alt="기획뷰어" width={28} height={28} style={{ borderRadius: 6, display: "block" }} />
           <span style={{ fontSize: 15, fontWeight: 600, color: C.ink, letterSpacing: "-0.3px" }}>기획뷰어</span>
         </Link>
 
@@ -531,9 +527,7 @@ export default function LandingPage() {
         style={{ borderTop: `1px solid ${C.hairlineSoft}`, padding: "40px 24px", maxWidth: "none" }}
       >
         <div className="flex items-center gap-2">
-          <div style={{ width: 22, height: 22, borderRadius: 6, background: C.surface1, border: `1px solid ${C.hairline}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <FileText style={{ width: 12, height: 12, color: C.inkMuted }} />
-          </div>
+          <Image src="/logo.png" alt="기획뷰어" width={22} height={22} style={{ borderRadius: 5, display: "block", opacity: 0.6 }} />
           <span style={{ fontSize: 13, fontWeight: 500, color: C.inkMuted, letterSpacing: "-0.13px" }}>기획뷰어</span>
         </div>
         <p style={{ fontSize: 12, color: "#333", letterSpacing: "-0.12px", margin: 0 }}>ai_pm_editor 산출물 뷰어 · 내부 도구</p>
