@@ -139,7 +139,7 @@ function Header() {
             ) : (
               <button
                 style={btnPrimary}
-                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                onClick={() => window.location.href = "/login"}
                 onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
                 onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
               >
@@ -180,7 +180,7 @@ function Header() {
                   <button style={{ ...btnPrimary,   justifyContent: "center" }} onClick={() => router.push("/dashboard")}>대시보드</button>
                 </>
               ) : (
-                <button style={{ ...btnPrimary, justifyContent: "center" }} onClick={() => signIn("google", { callbackUrl: "/dashboard" })}>Google로 로그인</button>
+                <button style={{ ...btnPrimary, justifyContent: "center" }} onClick={() => window.location.href = "/login"}>Google로 로그인</button>
               )}
             </div>
           </motion.div>
@@ -303,7 +303,7 @@ export default function LandingPage() {
               <>
                 <button
                   style={btnPrimary}
-                  onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                  onClick={() => window.location.href = "/login"}
                   onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
                   onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
                 >
@@ -511,7 +511,7 @@ export default function LandingPage() {
           </Link>
         ) : (
           <button style={btnPrimary}
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+            onClick={() => window.location.href = "/login"}
             onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
             onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
           >
