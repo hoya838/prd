@@ -104,7 +104,7 @@ function Header() {
         {/* Logo */}
         <Link href="/" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="기획뷰어" style={{ height: 24, width: "auto", display: "block" }} />
+          <img src="/logo.png" alt="기획뷰어" style={{ height: 18, width: "auto", display: "block" }} />
         </Link>
 
         {/* Desktop nav */}
