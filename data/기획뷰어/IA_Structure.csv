@@ -1,0 +1,12 @@
+depth1,depth2,depth3,screen_id,screen_name,parent_id,auth_required,role
+인증,,,SCR-SH-001,로그인,,false,shared
+인증,,,SCR-SH-002,접근 거부,,false,shared
+인증,,,SCR-SH-003,이용약관 동의,,true,shared
+뷰어,,,SCR-U-001,프로젝트 목록,,true,user
+뷰어,산출물 열람,,SCR-U-002,PRD 뷰,SCR-U-001,true,user
+뷰어,산출물 열람,,SCR-U-003,IA 뷰,SCR-U-001,true,user
+뷰어,산출물 열람,,SCR-U-004,화면명세 뷰,SCR-U-001,true,user
+뷰어,산출물 열람,,SCR-U-005,스프린트백로그 뷰,SCR-U-001,true,user
+뷰어,산출물 열람,,SCR-U-006,ERD 뷰,SCR-U-001,true,user
+뷰어,산출물 열람,,SCR-U-007,정책 뷰,SCR-U-001,true,user
+뷰어,,,SCR-U-008,워크플로우 뷰,SCR-U-001,true,user

@@ -16,7 +16,7 @@ export async function GET(
   { params }: { params: Promise<{ project: string; artifact: string }> }
 ) {
   const { project, artifact } = await params;
-  const base = process.env.OUTPUT_BASE_PATH;
+  const base = process.env.OUTPUT_BASE_PATH ?? path.join(process.cwd(), "data");
   if (!base) return NextResponse.json({ error: "OUTPUT_BASE_PATH not set" }, { status: 500 });
 
   const candidates = ARTIFACT_FILES[artifact];

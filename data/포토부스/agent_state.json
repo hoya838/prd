@@ -1,0 +1,56 @@
+{
+  "pipeline_status": "idle",
+  "current_command": null,
+  "last_updated": "2026-05-26T14:24:51Z",
+  "agents": {
+    "product_manager": {
+      "persona": "피엠",
+      "role": "자연어 아이디어 → PRD.md",
+      "status": "idle",
+      "last_action": null,
+      "ts": null
+    },
+    "information_architect": {
+      "persona": "아이에이",
+      "role": "PRD.md → IA_Structure.csv",
+      "status": "idle",
+      "last_action": null,
+      "ts": null
+    },
+    "ux_specification_agent": {
+      "persona": "유엑스",
+      "role": "IA_Structure.csv → Screen_Specs.md",
+      "status": "idle",
+      "last_action": null,
+      "ts": null
+    },
+    "agile_scrum_master": {
+      "persona": "스크럼",
+      "role": "Screen_Specs.md → Sprint_Backlog.json",
+      "status": "idle",
+      "last_action": null,
+      "ts": null
+    },
+    "database_architect": {
+      "persona": "디비",
+      "role": "PRD.md + IA_Structure.csv → ERD.md",
+      "status": "idle",
+      "last_action": null,
+      "ts": null
+    },
+    "validator": {
+      "persona": "발리",
+      "role": "5개 산출물 교차검증",
+      "status": "idle",
+      "last_action": null,
+      "ts": null
+    },
+    "change_manager": {
+      "persona": "체인저",
+      "role": "기능 변경 영향 분석 → 전체 산출물 delta 반영",
+      "status": "idle",
+      "last_action": null,
+      "ts": null
+    }
+  }
+}
