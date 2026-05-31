@@ -103,9 +103,8 @@ function Header() {
         style={{ maxWidth: 1200 }}
       >
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2" style={{ textDecoration: "none" }}>
-          <Image src="/logo.png" alt="기획뷰어" width={28} height={28} style={{ borderRadius: 6, display: "block" }} />
-          <span style={{ fontSize: 15, fontWeight: 600, color: C.ink, letterSpacing: "-0.3px" }}>기획뷰어</span>
+        <Link href="/" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+          <Image src="/logo.png" alt="기획뷰어" width={119} height={27} style={{ height: 24, width: "auto", display: "block" }} />
         </Link>
 
         {/* Desktop nav */}
@@ -526,9 +525,8 @@ export default function LandingPage() {
         className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6"
         style={{ borderTop: `1px solid ${C.hairlineSoft}`, padding: "40px 24px", maxWidth: "none" }}
       >
-        <div className="flex items-center gap-2">
-          <Image src="/logo.png" alt="기획뷰어" width={22} height={22} style={{ borderRadius: 5, display: "block", opacity: 0.6 }} />
-          <span style={{ fontSize: 13, fontWeight: 500, color: C.inkMuted, letterSpacing: "-0.13px" }}>기획뷰어</span>
+        <div>
+          <Image src="/logo.png" alt="기획뷰어" width={119} height={27} style={{ height: 18, width: "auto", display: "block", opacity: 0.4 }} />
         </div>
         <p style={{ fontSize: 12, color: "#333", letterSpacing: "-0.12px", margin: 0 }}>ai_pm_editor 산출물 뷰어 · 내부 도구</p>
       </footer>
