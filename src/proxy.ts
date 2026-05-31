@@ -11,7 +11,8 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/unauthorized") ||
     pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico";
+    pathname === "/favicon.ico" ||
+    /\.(png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)$/.test(pathname);
 
   if (isPublic) return NextResponse.next();
 
