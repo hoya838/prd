@@ -1,101 +1,193 @@
 "use client";
 
-import { useSession, signIn } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, AnimatePresence, type Variants } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { ArrowRight, FileText, Layers, GitBranch, Menu, X } from "lucide-react";
 import Link from "next/link";
 
+// ── Design tokens (design.md) ──────────────────────────────────────────────
+const C = {
+  canvas:       "#000000",
+  surface1:     "#1a1a1a",
+  surface2:     "#262626",
+  ink:          "#ffffff",
+  inkMuted:     "#999999",
+  hairline:     "rgba(255,255,255,0.10)",
+  hairlineSoft: "rgba(255,255,255,0.06)",
+} as const;
+
+const G = {
+  violet:  "linear-gradient(135deg,#2d1b69 0%,#6d28d9 50%,#4f46e5 100%)",
+  orange:  "linear-gradient(135deg,#7c2d12 0%,#ea580c 55%,#f59e0b 100%)",
+  coral:   "linear-gradient(135deg,#881337 0%,#e11d48 50%,#fb923c 100%)",
+} as const;
+
+// ── Shared styles ───────────────────────────────────────────────────────────
+const pill     = { borderRadius: "100px" } as const;
+const card20   = { borderRadius: "20px"  } as const;
+const card30   = { borderRadius: "30px"  } as const;
+const btnPrimary: React.CSSProperties = {
+  ...pill,
+  background:  C.ink,
+  color:       C.canvas,
+  fontSize:    14,
+  fontWeight:  500,
+  padding:     "10px 20px",
+  letterSpacing: "-0.14px",
+  display:     "inline-flex",
+  alignItems:  "center",
+  gap:         6,
+  border:      "none",
+  cursor:      "pointer",
+  whiteSpace:  "nowrap",
+  transition:  "opacity 0.15s",
+} as const;
+const btnSecondary: React.CSSProperties = {
+  ...pill,
+  background:  C.surface1,
+  color:       C.ink,
+  fontSize:    14,
+  fontWeight:  500,
+  padding:     "10px 20px",
+  letterSpacing: "-0.14px",
+  display:     "inline-flex",
+  alignItems:  "center",
+  gap:         6,
+  border:      `1px solid ${C.hairline}`,
+  cursor:      "pointer",
+  whiteSpace:  "nowrap",
+  transition:  "opacity 0.15s",
+} as const;
+
+// ── Animations ──────────────────────────────────────────────────────────────
+const fadeUp: Variants = {
+  hidden:  { opacity: 0, y: 28, filter: "blur(6px)" },
+  visible: (i: number = 0) => ({
+    opacity: 1, y: 0, filter: "blur(0px)",
+    transition: { delay: i * 0.08, duration: 0.55, ease: "easeOut" },
+  }),
+};
+
+// ── Header ──────────────────────────────────────────────────────────────────
 function Header() {
   const { data: session, status } = useSession();
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
+    const fn = () => setScrolled(window.scrollY > 48);
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  const headerBg = scrolled
+    ? "rgba(0,0,0,0.85)"
+    : "transparent";
 
   return (
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled ? "rgba(22,21,15,0.88)" : "transparent",
-        backdropFilter: scrolled ? "blur(14px)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(247,247,244,0.08)" : "1px solid transparent",
+        background:    headerBg,
+        backdropFilter: scrolled ? "blur(16px) saturate(180%)" : "none",
+        borderBottom:  scrolled ? `1px solid ${C.hairlineSoft}` : "1px solid transparent",
+        height:        56,
       }}
     >
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div
+        className="mx-auto flex items-center justify-between px-6 h-full"
+        style={{ maxWidth: 1200 }}
+      >
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded flex items-center justify-center bg-[#f7f7f4]">
-            <FileText className="w-3.5 h-3.5 text-[#16150f]" />
+        <Link href="/" className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
+          <div
+            className="flex items-center justify-center"
+            style={{ width: 28, height: 28, borderRadius: 8, background: C.surface2, border: `1px solid ${C.hairline}` }}
+          >
+            <FileText style={{ width: 14, height: 14, color: C.ink }} />
           </div>
-          <span className="text-sm font-semibold text-[#f7f7f4] tracking-tight">기획뷰어</span>
+          <span style={{ fontSize: 15, fontWeight: 600, color: C.ink, letterSpacing: "-0.3px" }}>기획뷰어</span>
         </Link>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
-          <a href="#features" className="px-3 py-1.5 text-sm text-[#807d72] hover:text-[#f7f7f4] transition-colors">기능</a>
-          <a href="#how" className="px-3 py-1.5 text-sm text-[#807d72] hover:text-[#f7f7f4] transition-colors">사용법</a>
+          <a href="#features" style={{ padding: "6px 12px", fontSize: 14, color: C.inkMuted, textDecoration: "none", borderRadius: 8, transition: "color 0.15s" }}
+            onMouseEnter={e => (e.currentTarget.style.color = C.ink)}
+            onMouseLeave={e => (e.currentTarget.style.color = C.inkMuted)}>기능</a>
+          <a href="#how" style={{ padding: "6px 12px", fontSize: 14, color: C.inkMuted, textDecoration: "none", borderRadius: 8, transition: "color 0.15s" }}
+            onMouseEnter={e => (e.currentTarget.style.color = C.ink)}
+            onMouseLeave={e => (e.currentTarget.style.color = C.inkMuted)}>사용법</a>
 
-          {status === "authenticated" ? (
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="ml-3 px-4 py-2 text-sm font-medium text-[#16150f] bg-[#f7f7f4] hover:bg-white transition-colors flex items-center gap-1.5"
-              style={{ borderRadius: "8px" }}
-            >
-              대시보드
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          ) : (
-            <button
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="ml-3 px-4 py-2 text-sm font-medium text-white bg-[#f54e00] hover:bg-[#d04200] transition-colors"
-              style={{ borderRadius: "8px" }}
-            >
-              로그인
-            </button>
-          )}
+          <div className="flex items-center gap-2 ml-3">
+            {status === "authenticated" ? (
+              <>
+                <button
+                  style={btnSecondary}
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.7")}
+                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
+                >
+                  로그아웃
+                </button>
+                <button
+                  style={btnPrimary}
+                  onClick={() => router.push("/dashboard")}
+                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
+                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
+                >
+                  대시보드 <ArrowRight style={{ width: 14, height: 14 }} />
+                </button>
+              </>
+            ) : (
+              <button
+                style={btnPrimary}
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
+              >
+                로그인
+              </button>
+            )}
+          </div>
         </nav>
 
-        {/* Mobile menu toggle */}
-        <button className="md:hidden text-[#f7f7f4]" onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden"
+          style={{ color: C.ink, padding: 6, background: "none", border: "none", cursor: "pointer" }}
+          onClick={() => setOpen(!open)}
+          aria-label="메뉴"
+        >
+          {open ? <X style={{ width: 20, height: 20 }} /> : <Menu style={{ width: 20, height: 20 }} />}
         </button>
       </div>
 
       {/* Mobile drawer */}
       <AnimatePresence>
-        {menuOpen && (
+        {open && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
+            exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15 }}
-            className="md:hidden border-t px-6 py-4 flex flex-col gap-2"
-            style={{ background: "#1a1917", borderColor: "rgba(247,247,244,0.08)" }}
+            className="md:hidden flex flex-col gap-1 px-6 pb-5 pt-3"
+            style={{ background: "rgba(0,0,0,0.95)", backdropFilter: "blur(16px)", borderBottom: `1px solid ${C.hairlineSoft}` }}
           >
-            <a href="#features" className="py-2 text-sm text-[#807d72]" onClick={() => setMenuOpen(false)}>기능</a>
-            <a href="#how" className="py-2 text-sm text-[#807d72]" onClick={() => setMenuOpen(false)}>사용법</a>
-            {status === "authenticated" ? (
-              <button
-                onClick={() => router.push("/dashboard")}
-                className="mt-2 px-4 py-2.5 text-sm font-medium text-[#16150f] bg-[#f7f7f4] rounded-lg text-left"
-              >
-                대시보드 →
-              </button>
-            ) : (
-              <button
-                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-                className="mt-2 px-4 py-2.5 text-sm font-medium text-white bg-[#f54e00] rounded-lg text-left"
-              >
-                Google로 로그인
-              </button>
-            )}
+            <a href="#features" style={{ padding: "10px 0", fontSize: 15, color: C.inkMuted, textDecoration: "none" }} onClick={() => setOpen(false)}>기능</a>
+            <a href="#how"      style={{ padding: "10px 0", fontSize: 15, color: C.inkMuted, textDecoration: "none" }} onClick={() => setOpen(false)}>사용법</a>
+            <div className="flex flex-col gap-2 mt-3">
+              {status === "authenticated" ? (
+                <>
+                  <button style={{ ...btnSecondary, justifyContent: "center" }} onClick={() => signOut({ callbackUrl: "/" })}>로그아웃</button>
+                  <button style={{ ...btnPrimary,   justifyContent: "center" }} onClick={() => router.push("/dashboard")}>대시보드</button>
+                </>
+              ) : (
+                <button style={{ ...btnPrimary, justifyContent: "center" }} onClick={() => signIn("google", { callbackUrl: "/dashboard" })}>Google로 로그인</button>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -103,109 +195,90 @@ function Header() {
   );
 }
 
-const FEATURES = [
-  {
-    icon: FileText,
-    title: "산출물 열람",
-    desc: "PRD · IA · 화면명세 · 스프린트 · ERD · 정책 문서를 탭으로 빠르게 전환하며 열람",
-    dot: "#9fbbe0",
-  },
-  {
-    icon: GitBranch,
-    title: "산출물 플로우",
-    desc: "PRD에서 ERD까지 문서 간 파급 관계를 n8n 스타일 노드 그래프로 시각화",
-    dot: "#c0a8dd",
-  },
-  {
-    icon: Layers,
-    title: "화면 플로우",
-    desc: "IA 구조를 기반으로 화면 간 내비게이션과 인증 흐름을 드래그 가능한 그래프로 표현",
-    dot: "#9fc9a2",
-  },
-];
-
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 24, filter: "blur(4px)" },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { delay: i * 0.08, duration: 0.5, ease: "easeOut" },
-  }),
-};
-
+// ── Landing Page ─────────────────────────────────────────────────────────────
 export default function LandingPage() {
   const { data: session, status } = useSession();
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 60]);
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 48]);
 
   return (
-    <div className="min-h-screen" style={{ background: "#16150f", fontFamily: "var(--font-sans)" }}>
+    <div style={{ background: C.canvas, minHeight: "100vh", fontFamily: "var(--font-sans)" }}>
       <Header />
 
-      {/* Hero */}
-      <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-20 overflow-hidden">
-        {/* Dot grid */}
+      {/* ── Hero ──────────────────────────────────────────────────────────── */}
+      <section
+        ref={heroRef}
+        className="relative flex flex-col items-center justify-center overflow-hidden"
+        style={{ minHeight: "100svh", padding: "96px 24px 80px" }}
+      >
+        {/* Subtle dot grid */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: "radial-gradient(circle, rgba(247,247,244,0.07) 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
+            backgroundImage: `radial-gradient(circle, ${C.hairlineSoft} 1px, transparent 1px)`,
+            backgroundSize: "40px 40px",
           }}
         />
-        {/* Glow */}
-        <div
-          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-          style={{
-            width: 600,
-            height: 600,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(245,78,0,0.08) 0%, transparent 70%)",
-          }}
-        />
+        {/* Ambient glow */}
+        <div className="absolute pointer-events-none" style={{
+          top: "30%", left: "50%", transform: "translate(-50%,-50%)",
+          width: 800, height: 800, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(109,40,217,0.06) 0%, transparent 70%)",
+        }} />
 
-        <motion.div style={{ y: heroY }} className="relative z-10 max-w-3xl mx-auto text-center">
+        <motion.div style={{ y: heroY, maxWidth: 780, margin: "0 auto", textAlign: "center" }} className="relative z-10 w-full">
           {/* Badge */}
           <motion.div custom={0} initial="hidden" animate="visible" variants={fadeUp}>
-            <span
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider mb-8"
-              style={{
-                background: "rgba(247,247,244,0.06)",
-                border: "1px solid rgba(247,247,244,0.12)",
-                color: "#807d72",
-              }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#1f8a65]" />
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "6px 14px", ...pill,
+              background: C.surface1, border: `1px solid ${C.hairline}`,
+              fontSize: 12, fontWeight: 500, color: C.inkMuted, letterSpacing: "0.02em",
+              textTransform: "uppercase", marginBottom: 32,
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", flexShrink: 0 }} />
               ai_pm_editor 산출물 뷰어
             </span>
           </motion.div>
 
-          {/* Headline */}
+          {/* Headline — display-xl level */}
           <motion.h1
             custom={1}
             initial="hidden"
             animate="visible"
             variants={fadeUp}
-            className="text-[52px] md:text-[72px] font-normal leading-[1.1] tracking-[-1.5px] mb-6"
-            style={{ color: "#f7f7f4" }}
+            style={{
+              fontSize: "clamp(48px, 8vw, 85px)",
+              fontWeight: 500,
+              lineHeight: 0.95,
+              letterSpacing: "clamp(-2px, -0.05em, -4.25px)",
+              color: C.ink,
+              margin: "0 0 24px",
+            }}
           >
             기획 산출물을
             <br />
-            <span style={{ color: "#5a5852" }}>한눈에 파악</span>
+            <span style={{ color: C.inkMuted }}>한눈에 파악</span>
           </motion.h1>
 
-          {/* Description */}
+          {/* Subhead — body-lg */}
           <motion.p
             custom={2}
             initial="hidden"
             animate="visible"
             variants={fadeUp}
-            className="text-lg leading-relaxed mb-10 max-w-xl mx-auto"
-            style={{ color: "#5a5852" }}
+            style={{
+              fontSize: 18,
+              fontWeight: 400,
+              lineHeight: 1.5,
+              letterSpacing: "-0.18px",
+              color: C.inkMuted,
+              margin: "0 auto 40px",
+              maxWidth: 520,
+            }}
           >
             PRD부터 ERD까지, ai_pm_editor가 생성한 기획 산출물을
-            <br className="hidden md:block" />
             프로젝트별로 열람하고 화면 플로우를 시각화합니다.
           </motion.p>
 
@@ -221,27 +294,27 @@ export default function LandingPage() {
               <>
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-[#16150f] bg-[#f7f7f4] hover:bg-white transition-colors"
-                  style={{ borderRadius: "8px" }}
+                  style={{ ...btnPrimary, textDecoration: "none" }}
+                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
+                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
                 >
-                  대시보드 바로가기
-                  <ArrowRight className="w-4 h-4" />
+                  대시보드 바로가기 <ArrowRight style={{ width: 16, height: 16 }} />
                 </Link>
-                <span className="text-sm" style={{ color: "#5a5852" }}>
+                <span style={{ fontSize: 14, color: C.inkMuted }}>
                   {session?.user?.name ?? session?.user?.email} 님 로그인 중
                 </span>
               </>
             ) : (
               <>
                 <button
+                  style={btnPrimary}
                   onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-[#f54e00] hover:bg-[#d04200] transition-colors"
-                  style={{ borderRadius: "8px" }}
+                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
+                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
                 >
-                  Google로 시작하기
-                  <ArrowRight className="w-4 h-4" />
+                  Google로 시작하기 <ArrowRight style={{ width: 16, height: 16 }} />
                 </button>
-                <span className="text-sm" style={{ color: "#3a3930" }}>허용된 계정만 접근 가능</span>
+                <span style={{ fontSize: 14, color: C.surface2.replace("#262626","#555") }}>허용된 계정만 접근 가능</span>
               </>
             )}
           </motion.div>
@@ -253,81 +326,54 @@ export default function LandingPage() {
           initial="hidden"
           animate="visible"
           variants={fadeUp}
-          className="relative z-10 mt-16 w-full max-w-4xl mx-auto"
+          className="relative z-10 w-full"
+          style={{ maxWidth: 900, margin: "64px auto 0" }}
         >
-          <div
-            className="overflow-hidden"
-            style={{
-              borderRadius: "12px",
-              border: "1px solid rgba(247,247,244,0.08)",
-              background: "#1a1917",
-              boxShadow: "0 0 0 1px rgba(247,247,244,0.04), 0 32px 64px rgba(0,0,0,0.4)",
-            }}
-          >
+          <div style={{
+            ...card20,
+            background: C.surface1,
+            border: `1px solid ${C.hairline}`,
+            boxShadow: `0 0 0 1px ${C.hairlineSoft}, 0 40px 80px rgba(0,0,0,0.6)`,
+            overflow: "hidden",
+          }}>
             {/* Topbar */}
-            <div
-              className="flex items-center gap-1.5 px-4 py-3"
-              style={{ borderBottom: "1px solid rgba(247,247,244,0.06)", background: "#16150f" }}
-            >
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(247,247,244,0.1)" }} />
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(247,247,244,0.1)" }} />
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(247,247,244,0.1)" }} />
-              <div
-                className="flex-1 mx-4 h-5 rounded flex items-center px-3"
-                style={{ background: "rgba(247,247,244,0.04)", border: "1px solid rgba(247,247,244,0.06)" }}
-              >
-                <span className="text-[10px]" style={{ color: "#3a3930" }}>localhost:3000/dashboard</span>
+            <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: `1px solid ${C.hairlineSoft}`, background: C.canvas }}>
+              {["#ff5f56","#ffbd2e","#27c93f"].map((c,i) => (
+                <span key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: c, opacity: 0.7 }} />
+              ))}
+              <div className="flex-1 mx-4 flex items-center px-3" style={{ height: 22, background: C.surface1, ...card30, border: `1px solid ${C.hairlineSoft}` }}>
+                <span style={{ fontSize: 11, color: "#444" }}>localhost:3000/dashboard</span>
               </div>
             </div>
             {/* Body */}
-            <div className="flex h-48">
-              <div
-                className="w-48 p-3 flex flex-col gap-2"
-                style={{ borderRight: "1px solid rgba(247,247,244,0.06)", background: "#16150f" }}
-              >
-                {["기획뷰어", "포토부스앱", "디자인시스템"].map((name, i) => (
-                  <div
-                    key={i}
-                    className="h-8 rounded-lg px-3 flex items-center"
-                    style={{
-                      background: i === 0 ? "rgba(247,247,244,0.06)" : "transparent",
-                      border: i === 0 ? "1px solid rgba(247,247,244,0.08)" : "none",
-                    }}
-                  >
-                    <span className="text-[11px]" style={{ color: i === 0 ? "#a09c92" : "#3a3930" }}>{name}</span>
+            <div className="flex" style={{ height: 200 }}>
+              {/* Sidebar mock */}
+              <div className="flex-none flex flex-col gap-2 p-3" style={{ width: 180, borderRight: `1px solid ${C.hairlineSoft}`, background: "#0a0a0a" }}>
+                {["기획뷰어", "포토부스앱", "디자인시스템"].map((n, i) => (
+                  <div key={i} className="flex items-center px-3" style={{
+                    height: 34, ...card20,
+                    background: i === 0 ? C.surface2 : "transparent",
+                    border: i === 0 ? `1px solid ${C.hairline}` : "none",
+                  }}>
+                    <span style={{ fontSize: 11, color: i === 0 ? C.ink : "#444" }}>{n}</span>
                   </div>
                 ))}
               </div>
+              {/* Content mock */}
               <div className="flex-1 p-4 flex flex-col gap-3">
-                <div className="flex gap-2">
-                  {["PRD", "IA 구조", "화면 명세", "스프린트", "ERD"].map((tab, i) => (
-                    <div
-                      key={i}
-                      className="px-3 py-1.5 text-[11px]"
-                      style={{
-                        borderRadius: "6px",
-                        background: i === 0 ? "#f54e00" : "rgba(247,247,244,0.05)",
-                        color: i === 0 ? "white" : "#3a3930",
-                      }}
-                    >
-                      {tab}
-                    </div>
+                <div className="flex gap-2 flex-wrap">
+                  {["PRD", "IA 구조", "화면 명세", "스프린트", "ERD"].map((t, i) => (
+                    <div key={i} className="flex items-center justify-center" style={{
+                      padding: "4px 12px", borderRadius: 100,
+                      background: i === 0 ? C.ink : C.surface1,
+                      color: i === 0 ? C.canvas : C.inkMuted,
+                      fontSize: 11, fontWeight: 500,
+                    }}>{t}</div>
                   ))}
                 </div>
-                <div
-                  className="flex-1 p-4 flex flex-col gap-2"
-                  style={{
-                    borderRadius: "10px",
-                    border: "1px solid rgba(247,247,244,0.06)",
-                    background: "rgba(247,247,244,0.02)",
-                  }}
-                >
-                  {[80, 60, 72, 50].map((w, i) => (
-                    <div
-                      key={i}
-                      className="h-2.5 rounded-full"
-                      style={{ width: `${w}%`, background: "rgba(247,247,244,0.07)" }}
-                    />
+                <div className="flex-1 flex flex-col gap-2.5 p-4" style={{ background: C.canvas, ...card20, border: `1px solid ${C.hairlineSoft}` }}>
+                  {[78, 55, 68, 42].map((w, i) => (
+                    <div key={i} style={{ height: 10, width: `${w}%`, borderRadius: 5, background: C.surface2 }} />
                   ))}
                 </div>
               </div>
@@ -336,129 +382,161 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* Features */}
-      <section
-        id="features"
-        className="py-24 px-6"
-        style={{ background: "#1a1917", borderTop: "1px solid rgba(247,247,244,0.06)" }}
-      >
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "#3a3930" }}>기능</p>
-            <h2 className="text-[36px] font-normal tracking-tight leading-snug" style={{ color: "#f7f7f4" }}>
-              기획 문서를 보는 새로운 방법
+      {/* ── Features ──────────────────────────────────────────────────────── */}
+      <section id="features" style={{ padding: "96px 24px", borderTop: `1px solid ${C.hairlineSoft}` }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 64 }}>
+            <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: C.inkMuted, marginBottom: 12 }}>기능</p>
+            <h2 style={{
+              fontSize: "clamp(32px, 5vw, 62px)",
+              fontWeight: 500,
+              lineHeight: 1.0,
+              letterSpacing: "clamp(-1.5px, -0.05em, -3.1px)",
+              color: C.ink,
+              margin: 0,
+            }}>
+              기획 문서를 보는<br />새로운 방법
             </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {FEATURES.map((f, i) => (
+
+          {/* 2-col grid: 3 charcoal cards + 1 gradient spotlight */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Gradient spotlight — violet */}
+            <motion.div
+              custom={0} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} variants={fadeUp}
+              className="md:row-span-2 flex flex-col justify-between"
+              style={{ background: G.violet, ...card30, padding: 32, minHeight: 280 }}
+            >
+              <div>
+                <div style={{ marginBottom: 16 }}>
+                  <GitBranch style={{ width: 28, height: 28, color: "rgba(255,255,255,0.8)" }} />
+                </div>
+                <h3 style={{ fontSize: 22, fontWeight: 500, lineHeight: 1.2, letterSpacing: "-0.8px", color: C.ink, margin: "0 0 12px" }}>산출물 플로우</h3>
+                <p style={{ fontSize: 15, lineHeight: 1.5, letterSpacing: "-0.15px", color: "rgba(255,255,255,0.65)", margin: 0 }}>
+                  PRD에서 ERD까지 문서 간 파급 관계를 n8n 스타일 노드 그래프로 시각화합니다. 노드 클릭 시 해당 산출물이 슬라이드 패널로 열립니다.
+                </p>
+              </div>
+              <div style={{ marginTop: 32, padding: "8px 16px", background: "rgba(255,255,255,0.15)", borderRadius: 100, display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: C.ink, fontWeight: 500, width: "fit-content" }}>
+                노드 드래그 이동 가능
+              </div>
+            </motion.div>
+
+            {/* Feature card 1 */}
+            <motion.div
+              custom={1} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} variants={fadeUp}
+              style={{ background: C.surface1, ...card20, padding: 28, border: `1px solid ${C.hairline}` }}
+            >
+              <div style={{ marginBottom: 16 }}>
+                <FileText style={{ width: 24, height: 24, color: C.inkMuted }} />
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-0.5px", color: C.ink, margin: "0 0 10px" }}>산출물 열람</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.5, letterSpacing: "-0.14px", color: C.inkMuted, margin: 0 }}>
+                PRD · IA · 화면명세 · 스프린트 · ERD · 정책 문서를 탭으로 빠르게 전환하며 열람합니다.
+              </p>
+            </motion.div>
+
+            {/* Feature card 2 */}
+            <motion.div
+              custom={2} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }} variants={fadeUp}
+              style={{ background: C.surface1, ...card20, padding: 28, border: `1px solid ${C.hairline}` }}
+            >
+              <div style={{ marginBottom: 16 }}>
+                <Layers style={{ width: 24, height: 24, color: C.inkMuted }} />
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-0.5px", color: C.ink, margin: "0 0 10px" }}>화면 플로우</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.5, letterSpacing: "-0.14px", color: C.inkMuted, margin: 0 }}>
+                IA 구조 기반으로 화면 간 내비게이션과 인증 흐름을 드래그 가능한 그래프로 표현합니다.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── How-to ────────────────────────────────────────────────────────── */}
+      <section id="how" style={{ padding: "96px 24px", borderTop: `1px solid ${C.hairlineSoft}` }}>
+        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: C.inkMuted, marginBottom: 12 }}>사용법</p>
+            <h2 style={{
+              fontSize: "clamp(32px, 5vw, 62px)",
+              fontWeight: 500,
+              lineHeight: 1.0,
+              letterSpacing: "clamp(-1.5px, -0.05em, -3.1px)",
+              color: C.ink,
+              margin: 0,
+            }}>3단계로 시작</h2>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {[
+              { n: "01", title: "Google 로그인",  desc: "허용된 구글 계정으로 로그인합니다." },
+              { n: "02", title: "프로젝트 선택",  desc: "OUTPUT_BASE_PATH 폴더의 프로젝트 목록이 자동으로 표시됩니다." },
+              { n: "03", title: "산출물 열람",    desc: "탭 전환으로 PRD·IA·명세서·ERD를 확인하고 플로우 그래프를 탐색합니다." },
+            ].map(({ n, title, desc }, i) => (
               <motion.div
-                key={i}
+                key={n}
                 custom={i}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true, margin: "-60px" }}
+                viewport={{ once: true, margin: "-40px" }}
                 variants={fadeUp}
-                className="p-6"
-                style={{
-                  borderRadius: "12px",
-                  background: "rgba(247,247,244,0.03)",
-                  border: "1px solid rgba(247,247,244,0.07)",
-                }}
+                className="flex gap-5 items-start"
+                style={{ background: C.surface1, ...card20, padding: "22px 24px", border: `1px solid ${C.hairline}` }}
               >
-                <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center mb-4"
-                  style={{
-                    background: f.dot + "18",
-                    border: `1px solid ${f.dot}30`,
-                  }}
-                >
-                  <f.icon className="w-4 h-4" style={{ color: f.dot }} />
+                <span style={{ fontSize: 11, fontWeight: 500, color: "#444", letterSpacing: "0.08em", textTransform: "uppercase", paddingTop: 2, flexShrink: 0, width: 24 }}>{n}</span>
+                <div>
+                  <p style={{ fontSize: 15, fontWeight: 500, color: C.ink, margin: "0 0 6px", letterSpacing: "-0.15px" }}>{title}</p>
+                  <p style={{ fontSize: 14, color: C.inkMuted, margin: 0, lineHeight: 1.5, letterSpacing: "-0.14px" }}>{desc}</p>
                 </div>
-                <h3 className="text-sm font-semibold mb-2" style={{ color: "#f7f7f4" }}>{f.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#5a5852" }}>{f.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How */}
-      <section
-        id="how"
-        className="py-24 px-6"
-        style={{ background: "#16150f", borderTop: "1px solid rgba(247,247,244,0.06)" }}
-      >
-        <div className="max-w-2xl mx-auto text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: "#3a3930" }}>사용법</p>
-          <h2 className="text-[36px] font-normal tracking-tight leading-snug mb-8" style={{ color: "#f7f7f4" }}>
-            3단계로 시작
-          </h2>
-          <div className="flex flex-col gap-4 text-left">
-            {[
-              { step: "01", title: "Google 로그인", desc: "허용된 구글 계정으로 로그인합니다." },
-              { step: "02", title: "프로젝트 선택", desc: "OUTPUT_BASE_PATH 폴더의 프로젝트 목록이 자동으로 표시됩니다." },
-              { step: "03", title: "산출물 열람", desc: "탭 전환으로 PRD·IA·명세서·ERD를 확인하고 플로우 그래프를 탐색합니다." },
-            ].map(({ step, title, desc }) => (
-              <div
-                key={step}
-                className="flex gap-5 items-start p-5"
-                style={{
-                  borderRadius: "12px",
-                  background: "rgba(247,247,244,0.03)",
-                  border: "1px solid rgba(247,247,244,0.07)",
-                }}
-              >
-                <span className="text-[11px] font-semibold uppercase tracking-wider pt-0.5 w-6 shrink-0" style={{ color: "#3a3930" }}>{step}</span>
-                <div>
-                  <p className="text-sm font-semibold mb-1" style={{ color: "#f7f7f4" }}>{title}</p>
-                  <p className="text-sm" style={{ color: "#5a5852" }}>{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA band */}
-      <section
-        className="py-24 px-6 text-center"
-        style={{ background: "#1a1917", borderTop: "1px solid rgba(247,247,244,0.06)" }}
-      >
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-4" style={{ color: "#3a3930" }}>지금 시작</p>
-        <h2 className="text-[36px] font-normal tracking-tight leading-snug mb-8" style={{ color: "#f7f7f4" }}>
-          기획 산출물을 팀과 함께 확인하세요
+      {/* ── CTA band ──────────────────────────────────────────────────────── */}
+      <section style={{ padding: "96px 24px", borderTop: `1px solid ${C.hairlineSoft}`, textAlign: "center" }}>
+        <p style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: C.inkMuted, marginBottom: 20 }}>지금 시작</p>
+        <h2 style={{
+          fontSize: "clamp(36px, 6vw, 85px)",
+          fontWeight: 500,
+          lineHeight: 0.95,
+          letterSpacing: "clamp(-2px, -0.05em, -4.25px)",
+          color: C.ink,
+          margin: "0 0 40px",
+        }}>
+          기획 산출물을<br />팀과 함께 확인하세요
         </h2>
         {status === "authenticated" ? (
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-[#f54e00] hover:bg-[#d04200] transition-colors"
-            style={{ borderRadius: "8px" }}
+          <Link href="/dashboard" style={{ ...btnPrimary, textDecoration: "none" }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
+            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
           >
-            대시보드 열기 <ArrowRight className="w-4 h-4" />
+            대시보드 열기 <ArrowRight style={{ width: 16, height: 16 }} />
           </Link>
         ) : (
-          <button
+          <button style={btnPrimary}
             onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-[#f54e00] hover:bg-[#d04200] transition-colors"
-            style={{ borderRadius: "8px" }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
+            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = "1")}
           >
-            Google로 시작하기 <ArrowRight className="w-4 h-4" />
+            Google로 시작하기 <ArrowRight style={{ width: 16, height: 16 }} />
           </button>
         )}
       </section>
 
-      {/* Footer */}
+      {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer
-        className="px-6 py-8 flex items-center justify-between"
-        style={{ borderTop: "1px solid rgba(247,247,244,0.06)", background: "#16150f" }}
+        className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6"
+        style={{ borderTop: `1px solid ${C.hairlineSoft}`, padding: "40px 24px", maxWidth: "none" }}
       >
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded flex items-center justify-center" style={{ background: "rgba(247,247,244,0.08)" }}>
-            <FileText className="w-3 h-3" style={{ color: "#807d72" }} />
+          <div style={{ width: 22, height: 22, borderRadius: 6, background: C.surface1, border: `1px solid ${C.hairline}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <FileText style={{ width: 12, height: 12, color: C.inkMuted }} />
           </div>
-          <span className="text-xs font-medium" style={{ color: "#3a3930" }}>기획뷰어</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: C.inkMuted, letterSpacing: "-0.13px" }}>기획뷰어</span>
         </div>
-        <p className="text-xs" style={{ color: "#2a2922" }}>ai_pm_editor 산출물 뷰어 · 내부 도구</p>
+        <p style={{ fontSize: 12, color: "#333", letterSpacing: "-0.12px", margin: 0 }}>ai_pm_editor 산출물 뷰어 · 내부 도구</p>
       </footer>
     </div>
   );
