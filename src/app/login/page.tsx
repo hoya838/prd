@@ -3,7 +3,17 @@
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Button } from "@/components/ui/button";
+
+const C = {
+  canvas:       "#000000",
+  surface1:     "#1a1a1a",
+  surface2:     "#262626",
+  ink:          "#ffffff",
+  inkMuted:     "#999999",
+  hairline:     "rgba(255,255,255,0.10)",
+  hairlineSoft: "rgba(255,255,255,0.06)",
+  accentBlue:   "rgba(0,153,255,0.15)",
+};
 
 type Step = "select" | "credentials";
 
@@ -17,6 +27,7 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [credError, setCredError] = useState("");
+  const [focusedField, setFocusedField] = useState<"email" | "password" | null>(null);
 
   async function handleCredentials(e: React.FormEvent) {
     e.preventDefault();
@@ -36,36 +47,111 @@ function LoginContent() {
     }
   }
 
+  const inputStyle = (focused: boolean): React.CSSProperties => ({
+    width: "100%",
+    background: C.surface1,
+    color: C.ink,
+    border: `1px solid ${focused ? "rgba(0,153,255,0.5)" : C.hairline}`,
+    boxShadow: focused ? `0 0 0 1px ${C.accentBlue}` : "none",
+    borderRadius: 10,
+    padding: "10px 14px",
+    fontSize: 15,
+    outline: "none",
+    transition: "border-color 0.15s, box-shadow 0.15s",
+    fontFamily: "inherit",
+    letterSpacing: "-0.15px",
+    boxSizing: "border-box" as const,
+  });
+
+  const methodButtonStyle: React.CSSProperties = {
+    width: "100%",
+    background: C.surface1,
+    color: C.ink,
+    border: `1px solid ${C.hairline}`,
+    borderRadius: 15,
+    padding: "14px 20px",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    cursor: "pointer",
+    fontSize: 14,
+    fontWeight: 500,
+    letterSpacing: "-0.14px",
+    transition: "background 0.15s, border-color 0.15s",
+    textAlign: "left" as const,
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 gap-6">
-      <div className="bg-white rounded-xl shadow-sm border p-10 flex flex-col items-center gap-6 w-full max-w-sm">
-        <div className="flex flex-col items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">기획뷰어</h1>
-          <p className="text-sm text-gray-500">허용된 계정만 접근 가능합니다</p>
+    <div style={{
+      background: C.canvas,
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: "'Inter', system-ui, sans-serif",
+      fontFeatureSettings: "'cv01','cv05','cv09','cv11','ss03','ss07','dlig'",
+    }}>
+      <div style={{
+        background: C.surface1,
+        border: `1px solid ${C.hairline}`,
+        borderRadius: 20,
+        padding: "40px 36px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 28,
+        width: "100%",
+        maxWidth: 360,
+        boxShadow: `rgba(255,255,255,0.10) 0px 0.5px 0px 0px inset, rgba(0,0,0,0.25) 0px 10px 30px 0px`,
+      }}>
+        {/* Logo + title */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="기획뷰어" style={{ height: 22, width: "auto", display: "block", marginBottom: 4 }} />
+          <p style={{ fontSize: 13, color: C.inkMuted, letterSpacing: "0.04em", textTransform: "uppercase", fontWeight: 500 }}>
+            허용된 계정만 접근 가능
+          </p>
         </div>
 
+        {/* Error */}
         {error === "AccessDenied" && (
-          <div className="w-full bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 text-center">
+          <div style={{
+            width: "100%",
+            background: "rgba(255,60,60,0.08)",
+            border: "1px solid rgba(255,60,60,0.20)",
+            borderRadius: 10,
+            padding: "10px 14px",
+            fontSize: 13,
+            color: "#ff6b6b",
+            textAlign: "center",
+            letterSpacing: "-0.13px",
+          }}>
             접근이 허용되지 않은 계정입니다
           </div>
         )}
 
+        {/* Select step */}
         {step === "select" && (
-          <div className="flex flex-col gap-3 w-full">
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
             <button
               type="button"
               onClick={() => setStep("credentials")}
-              className="w-full rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-gray-50 flex items-center gap-3"
+              style={methodButtonStyle}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.surface2; (e.currentTarget as HTMLElement).style.borderColor = C.hairline; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = C.surface1; }}
             >
-              <span className="text-base">🏢</span>
+              <span style={{ fontSize: 18, lineHeight: 1 }}>🏢</span>
               <span>회사계정 로그인</span>
             </button>
             <button
               type="button"
               onClick={() => signIn("google", { callbackUrl })}
-              className="w-full rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-gray-50 flex items-center gap-3"
+              style={methodButtonStyle}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.surface2; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = C.surface1; }}
             >
-              <svg width="16" height="16" viewBox="0 0 48 48" className="shrink-0">
+              <svg width="16" height="16" viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
                 <path fill="#4285F4" d="M46.6 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.5 2.9-2.2 5.4-4.7 7v5.8h7.6c4.5-4.1 7-10.2 7-16.8z"/>
                 <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.8c-2.2 1.5-5 2.3-8.3 2.3-6.4 0-11.8-4.3-13.7-10.1H2.4v6c4 7.9 12.1 13.4 21.6 13.4z"/>
                 <path fill="#FBBC05" d="M10.3 28.6A14.7 14.7 0 0 1 9.8 24c0-1.6.3-3.1.7-4.6v-6H2.4A24 24 0 0 0 0 24c0 3.9.9 7.5 2.4 10.7l7.9-6.1z"/>
@@ -76,37 +162,74 @@ function LoginContent() {
           </div>
         )}
 
+        {/* Credentials step */}
         {step === "credentials" && (
-          <form onSubmit={handleCredentials} className="flex flex-col gap-3 w-full">
+          <form onSubmit={handleCredentials} style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
             <input
               type="email"
               placeholder="이메일"
               value={email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              onFocus={() => setFocusedField("email")}
+              onBlur={() => setFocusedField(null)}
               required
               autoComplete="email"
               autoFocus
-              className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+              style={inputStyle(focusedField === "email")}
             />
             <input
               type="password"
               placeholder="비밀번호"
               value={password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+              onFocus={() => setFocusedField("password")}
+              onBlur={() => setFocusedField(null)}
               required
               autoComplete="current-password"
-              className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+              style={inputStyle(focusedField === "password")}
             />
             {credError && (
-              <p className="text-sm text-red-600 text-center">{credError}</p>
+              <p style={{ fontSize: 13, color: "#ff6b6b", textAlign: "center", margin: 0, letterSpacing: "-0.13px" }}>
+                {credError}
+              </p>
             )}
-            <Button type="submit" className="w-full" disabled={loading}>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: "100%",
+                background: loading ? C.surface2 : C.ink,
+                color: C.canvas,
+                border: "none",
+                borderRadius: 100,
+                padding: "10px 15px",
+                fontSize: 14,
+                fontWeight: 500,
+                letterSpacing: "-0.14px",
+                cursor: loading ? "not-allowed" : "pointer",
+                transition: "opacity 0.15s",
+                opacity: loading ? 0.6 : 1,
+                fontFamily: "inherit",
+              }}
+            >
               {loading ? "로그인 중..." : "로그인"}
-            </Button>
+            </button>
             <button
               type="button"
               onClick={() => { setStep("select"); setCredError(""); }}
-              className="text-xs text-gray-400 hover:text-gray-600 text-center mt-1"
+              style={{
+                background: "none",
+                border: "none",
+                color: C.inkMuted,
+                fontSize: 13,
+                cursor: "pointer",
+                textAlign: "center",
+                padding: "4px 0",
+                letterSpacing: "-0.13px",
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.ink; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.inkMuted; }}
             >
               ← 뒤로
             </button>
